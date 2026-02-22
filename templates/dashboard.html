@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VidyaQuest – Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0b1120;--surface:#111827;--card:#1a2235;--border:rgba(255,255,255,0.08);--gold:#f59e0b;--gold2:#fbbf24;--green:#10b981;--blue:#3b82f6;--pink:#ec4899;--orange:#f97316;--purple:#8b5cf6;--red:#ef4444;--text:#f1f5f9;--muted:#64748b;--muted2:#94a3b8;--font-head:'Baloo 2',cursive;--font-body:'Poppins',sans-serif;--radius:16px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 40% at 15% 20%,rgba(59,130,246,0.12),transparent 70%),radial-gradient(ellipse 50% 40% at 85% 75%,rgba(139,92,246,0.10),transparent 70%),radial-gradient(ellipse 40% 30% at 50% 90%,rgba(16,185,129,0.08),transparent 70%);}
+.layout{display:flex;min-height:100vh;position:relative;z-index:1;}
+/* SIDEBAR */
+.sidebar{width:240px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 1rem;position:sticky;top:0;height:100vh;}
+.logo{display:flex;align-items:center;gap:0.6rem;margin-bottom:2rem;padding:0 0.5rem;}
+.logo-icon{font-size:1.8rem;animation:bounce 3s ease-in-out infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+.logo h2{font-family:var(--font-head);font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.nav-section{margin-bottom:1.5rem;}
+.nav-label{font-size:0.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;padding:0 0.5rem;margin-bottom:0.5rem;}
+.nav-item{display:flex;align-items:center;gap:0.7rem;padding:0.7rem 0.75rem;border-radius:12px;cursor:pointer;transition:all 0.2s;font-size:0.88rem;font-weight:500;color:var(--muted2);margin-bottom:2px;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:var(--text);}
+.nav-item.active{background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(249,115,22,0.15));color:var(--gold);border:1px solid rgba(245,158,11,0.25);}
+.nav-item .icon{font-size:1.1rem;width:20px;text-align:center;}
+.sidebar-footer{margin-top:auto;}
+.user-card-mini{display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--card);border-radius:12px;border:1px solid var(--border);}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--orange));display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#0b1120;flex-shrink:0;}
+.user-info-mini .uname{font-size:0.82rem;font-weight:600;}
+.user-info-mini .urole{font-size:0.7rem;color:var(--muted2);}
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:2rem;display:flex;flex-direction:column;gap:1.5rem;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.topbar{display:flex;align-items:center;justify-content:space-between;animation:fadeUp 0.5s ease both;}
+.topbar h1{font-family:var(--font-head);font-size:1.6rem;font-weight:800;}
+.topbar h1 span{color:var(--gold);}
+.streak-pill{display:flex;align-items:center;gap:0.4rem;background:linear-gradient(135deg,rgba(249,115,22,0.2),rgba(245,158,11,0.15));border:1px solid rgba(249,115,22,0.35);padding:0.45rem 0.9rem;border-radius:50px;font-size:0.85rem;font-weight:700;color:var(--orange);}
+.hero-section{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;animation:fadeUp 0.5s 0.1s ease both;}
+.xp-card{grid-column:1/3;background:linear-gradient(135deg,#1a2a1a,#0f1f2a 50%,#1a1a2a);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius);padding:1.5rem;position:relative;overflow:hidden;}
+.xp-card::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,0.15),transparent 70%);}
+.xp-label{font-size:0.75rem;color:var(--muted2);text-transform:uppercase;letter-spacing:0.05em;}
+.xp-amount{font-family:var(--font-head);font-size:2.5rem;font-weight:800;color:var(--green);line-height:1;}
+.xp-amount span{font-size:1rem;color:var(--muted2);font-weight:500;}
+.level-badge{background:linear-gradient(135deg,var(--gold),var(--orange));color:#0b1120;padding:0.3rem 0.8rem;border-radius:50px;font-size:0.8rem;font-weight:800;font-family:var(--font-head);}
+.xp-bar-track{height:10px;background:rgba(255,255,255,0.08);border-radius:999px;overflow:hidden;margin-top:0.5rem;}
+.xp-bar-fill{height:100%;background:linear-gradient(90deg,var(--green),#34d399);border-radius:999px;width:0%;transition:width 1.5s cubic-bezier(.22,1,.36,1);box-shadow:0 0 10px rgba(16,185,129,0.5);}
+.xp-bar-label{display:flex;justify-content:space-between;font-size:0.75rem;color:var(--muted2);margin-bottom:0.4rem;margin-top:0.5rem;}
+.level-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.level-ring{width:80px;height:80px;position:relative;margin-bottom:0.75rem;}
+.level-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:rgba(255,255,255,0.07);stroke-width:6;}
+.ring-fill{fill:none;stroke:url(#ringGrad);stroke-width:6;stroke-linecap:round;stroke-dasharray:220;stroke-dashoffset:220;transition:stroke-dashoffset 1.5s cubic-bezier(.22,1,.36,1);}
+.level-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:1.5rem;font-weight:800;color:var(--gold);}
+.level-title-txt{font-family:var(--font-head);font-size:1rem;font-weight:700;color:var(--text);}
+.level-sub{font-size:0.72rem;color:var(--muted2);}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;animation:fadeUp 0.5s 0.2s ease both;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.2rem;display:flex;align-items:center;gap:0.8rem;transition:transform 0.2s;}
+.stat-card:hover{transform:translateY(-3px);}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+.stat-icon.blue{background:rgba(59,130,246,0.15);}
+.stat-icon.green{background:rgba(16,185,129,0.15);}
+.stat-icon.gold{background:rgba(245,158,11,0.15);}
+.stat-icon.purple{background:rgba(139,92,246,0.15);}
+.stat-info .val{font-family:var(--font-head);font-size:1.5rem;font-weight:800;line-height:1;}
+.stat-info .lbl{font-size:0.72rem;color:var(--muted2);margin-top:0.15rem;}
+.content-grid{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;animation:fadeUp 0.5s 0.3s ease both;}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.section-title{font-family:var(--font-head);font-size:1.1rem;font-weight:700;}
+.subjects-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}
+.subject-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;}
+.subject-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;}
+.subject-card.c1::before{background:linear-gradient(90deg,var(--blue),#60a5fa);}
+.subject-card.c2::before{background:linear-gradient(90deg,var(--green),#34d399);}
+.subject-card.c3::before{background:linear-gradient(90deg,var(--purple),#a78bfa);}
+.subject-card.c4::before{background:linear-gradient(90deg,var(--orange),var(--gold));}
+.subject-card.c5::before{background:linear-gradient(90deg,var(--pink),#f9a8d4);}
+.subject-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,0.15);box-shadow:0 12px 30px rgba(0,0,0,0.3);}
+.subj-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;}
+.subj-icon{font-size:1.6rem;}
+.subj-name{font-family:var(--font-head);font-size:0.95rem;font-weight:700;margin-bottom:0.5rem;}
+.subj-bar-track{height:5px;background:rgba(255,255,255,0.08);border-radius:999px;overflow:hidden;}
+.subj-bar-fill{height:100%;border-radius:999px;width:0%;transition:width 1.2s cubic-bezier(.22,1,.36,1);}
+.subj-bar-fill.c1{background:linear-gradient(90deg,var(--blue),#60a5fa);}
+.subj-bar-fill.c2{background:linear-gradient(90deg,var(--green),#34d399);}
+.subj-bar-fill.c3{background:linear-gradient(90deg,var(--purple),#a78bfa);}
+.subj-bar-fill.c4{background:linear-gradient(90deg,var(--orange),var(--gold));}
+.subj-bar-fill.c5{background:linear-gradient(90deg,var(--pink),#f9a8d4);}
+.subj-lessons{font-size:0.7rem;color:var(--muted2);margin-top:0.4rem;}
+.right-col{display:flex;flex-direction:column;gap:1rem;}
+.card-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;}
+/* Badges */
+.badges-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;}
+.badge-item{display:flex;flex-direction:column;align-items:center;gap:0.3rem;padding:0.6rem 0.3rem;border-radius:10px;text-align:center;transition:transform 0.2s;cursor:default;}
+.badge-item:hover{transform:scale(1.08);}
+.badge-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
+.badge-item.earned .badge-icon{background:linear-gradient(135deg,var(--gold),var(--orange));box-shadow:0 4px 12px rgba(245,158,11,0.4);}
+.badge-item.locked .badge-icon{background:rgba(255,255,255,0.06);filter:grayscale(1);}
+.badge-name{font-size:0.62rem;font-weight:600;color:var(--muted2);}
+.badge-item.earned .badge-name{color:var(--gold2);}
+/* Leaderboard */
+.lb-row{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.5rem;border-radius:10px;transition:background 0.2s;margin-bottom:2px;}
+.lb-row:hover{background:rgba(255,255,255,0.04);}
+.lb-row.me{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);}
+.lb-rank{width:22px;text-align:center;font-family:var(--font-head);font-size:0.9rem;font-weight:800;color:var(--muted);}
+.lb-rank.gold{color:#fbbf24;}.lb-rank.silver{color:#94a3b8;}.lb-rank.bronze{color:#cd7c2e;}
+.lb-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;color:#0b1120;flex-shrink:0;}
+.lb-info{flex:1;overflow:hidden;}
+.lb-name{font-size:0.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-village{font-size:0.68rem;color:var(--muted2);}
+.lb-xp{font-family:var(--font-head);font-size:0.88rem;font-weight:700;color:var(--gold);}
+/* Activity */
+.activity-item{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid var(--border);}
+.activity-item:last-child{border-bottom:none;}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.act-dot.green{background:var(--green);box-shadow:0 0 6px var(--green);}
+.act-dot.gold{background:var(--gold);box-shadow:0 0 6px var(--gold);}
+.act-text{flex:1;font-size:0.8rem;color:var(--muted2);}
+.act-text strong{color:var(--text);font-weight:600;}
+.act-xp{font-size:0.75rem;font-weight:700;color:var(--green);}
+/* Quiz modal */
+.modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;transform:scale(0.92);transition:transform 0.3s cubic-bezier(.22,1,.36,1);box-shadow:0 40px 80px rgba(0,0,0,0.6);}
+.modal-overlay.open .modal{transform:scale(1);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.modal-title{font-family:var(--font-head);font-size:1.3rem;font-weight:800;}
+.modal-close{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.08);border:none;color:var(--text);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:background 0.2s;}
+.modal-close:hover{background:rgba(255,255,255,0.15);}
+/* Quiz UI */
+.quiz-progress{display:flex;gap:4px;margin-bottom:1.2rem;}
+.quiz-pip{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s;}
+.quiz-pip.done{background:var(--green);}.quiz-pip.current{background:var(--gold);}
+.quiz-question{font-size:1.05rem;font-weight:600;margin-bottom:1.2rem;line-height:1.5;}
+.quiz-options{display:flex;flex-direction:column;gap:0.6rem;}
+.quiz-opt{padding:0.8rem 1rem;border-radius:12px;background:rgba(255,255,255,0.04);border:1.5px solid var(--border);cursor:pointer;font-size:0.9rem;transition:all 0.2s;display:flex;align-items:center;gap:0.75rem;}
+.quiz-opt:hover{border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.07);}
+.quiz-opt.selected{border-color:var(--blue);background:rgba(59,130,246,0.12);}
+.quiz-opt.correct{border-color:var(--green);background:rgba(16,185,129,0.15);}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(239,68,68,0.1);}
+.opt-key{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;flex-shrink:0;}
+.quiz-nav{display:flex;justify-content:flex-end;margin-top:1.2rem;gap:0.5rem;}
+.btn{padding:0.65rem 1.4rem;border-radius:10px;border:none;font-family:var(--font-head);font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-primary{background:linear-gradient(135deg,var(--gold),var(--orange));color:#0b1120;box-shadow:0 4px 15px rgba(245,158,11,0.35);}
+.btn-primary:hover{transform:translateY(-2px);}
+.btn-ghost{background:rgba(255,255,255,0.08);color:var(--text);}
+.result-screen{text-align:center;padding:1rem 0;}
+.result-emoji{font-size:4rem;margin-bottom:0.5rem;animation:pop 0.5s cubic-bezier(.22,1,.36,1);}
+@keyframes pop{from{transform:scale(0.3);}to{transform:scale(1);}}
+.result-score{font-family:var(--font-head);font-size:3rem;font-weight:800;color:var(--gold);}
+.result-label{color:var(--muted2);font-size:0.9rem;margin-bottom:1rem;}
+.result-xp{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:var(--green);padding:0.4rem 1rem;border-radius:50px;font-weight:700;font-size:0.9rem;margin-bottom:1.5rem;}
+.new-badges-row{display:flex;justify-content:center;gap:0.8rem;flex-wrap:wrap;margin-bottom:1rem;}
+.new-badge-pill{display:flex;align-items:center;gap:0.4rem;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);padding:0.35rem 0.8rem;border-radius:50px;font-size:0.8rem;font-weight:600;color:var(--gold);}
+/* Lesson list modal */
+.lesson-list-item{display:flex;align-items:center;gap:0.8rem;padding:0.75rem;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);margin-bottom:0.5rem;cursor:pointer;transition:all 0.2s;}
+.lesson-list-item:hover{border-color:rgba(255,255,255,0.15);transform:translateX(3px);}
+.lesson-list-item.done{opacity:0.65;}
+.ll-icon{font-size:1.2rem;width:36px;text-align:center;}
+.ll-info{flex:1;}
+.ll-title{font-size:0.85rem;font-weight:600;}
+.ll-meta{font-size:0.7rem;color:var(--muted2);margin-top:1px;}
+.ll-xp{font-size:0.72rem;font-weight:700;color:var(--gold);}
+/* XP toast */
+.xp-toast{position:fixed;bottom:2rem;right:2rem;z-index:200;background:linear-gradient(135deg,var(--green),#059669);color:white;padding:0.7rem 1.3rem;border-radius:50px;font-weight:700;font-size:0.9rem;transform:translateY(80px);opacity:0;transition:all 0.4s cubic-bezier(.22,1,.36,1);box-shadow:0 8px 24px rgba(16,185,129,0.4);pointer-events:none;}
+.xp-toast.show{transform:translateY(0);opacity:1;}
+.loading{display:flex;align-items:center;justify-content:center;padding:2rem;color:var(--muted2);}
+::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+<div class="xp-toast" id="xpToast"></div>
+
+<!-- Quiz / Lessons Modal -->
+<div class="modal-overlay" id="mainModal">
+  <div class="modal">
+    <div id="modalContent"><div class="loading">⏳ Loading...</div></div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🏫</div>
+      <h2>VidyaQuest</h2>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Main</div>
+      <button class="nav-item active"><span class="icon">🏠</span>Dashboard</button>
+      <button class="nav-item" onclick="showLeaderboardModal()"><span class="icon">🏆</span>Leaderboard</button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Subjects</div>
+      <div id="sidebarSubjects"><button class="nav-item"><span class="icon">⏳</span>Loading...</button></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Account</div>
+      <button class="nav-item" onclick="window.location='/logout'"><span class="icon">🚪</span>Logout</button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card-mini">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info-mini">
+          <div class="uname" id="sidebarName">Loading...</div>
+          <div class="urole" id="sidebarVillage">🌾 —</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <h1>Welcome back, <span id="heroName">...</span>! 👋</h1>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <div class="streak-pill">🔥 <span id="streakCount">0</span>-Day Streak!</div>
+      </div>
+    </div>
+
+    <!-- XP HERO -->
+    <div class="hero-section">
+      <div class="xp-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;">
+          <div>
+            <div class="xp-label">Total XP Earned</div>
+            <div class="xp-amount" id="xpAmount">— <span>XP</span></div>
+          </div>
+          <div class="level-badge" id="levelBadge">⚡ Level —</div>
+        </div>
+        <div class="xp-bar-label"><span id="levelFrom">—</span><span id="levelTo">— →</span></div>
+        <div class="xp-bar-track"><div class="xp-bar-fill" id="xpBar"></div></div>
+      </div>
+      <div class="level-card">
+        <div class="level-ring">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#f97316"/></linearGradient></defs>
+            <circle class="ring-bg" cx="40" cy="40" r="35"/>
+            <circle class="ring-fill" id="ringFill" cx="40" cy="40" r="35"/>
+          </svg>
+          <div class="level-num" id="levelNum">—</div>
+        </div>
+        <div class="level-title-txt" id="levelTitleTxt">—</div>
+        <div class="level-sub" id="levelSub">— XP to next level</div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon blue">📘</div><div class="stat-info"><div class="val" id="statLessons">—</div><div class="lbl">Lessons Done</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="val" id="statXP">—</div><div class="lbl">Total XP</div></div></div>
+      <div class="stat-card"><div class="stat-icon gold">🏅</div><div class="stat-info"><div class="val" id="statBadges">—</div><div class="lbl">Badges Earned</div></div></div>
+      <div class="stat-card"><div class="stat-icon purple">🏆</div><div class="stat-info"><div class="val" id="statRank">—</div><div class="lbl">Village Rank</div></div></div>
+    </div>
+
+    <!-- CONTENT GRID -->
+    <div class="content-grid">
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <!-- Subjects -->
+        <div class="card-box">
+          <div class="section-header"><div class="section-title">📚 My Subjects</div></div>
+          <div class="subjects-grid" id="subjectsGrid"><div class="loading">⏳ Loading subjects...</div></div>
+        </div>
+        <!-- Activity -->
+        <div class="card-box">
+          <div class="section-header"><div class="section-title">⚡ Recent Activity</div></div>
+          <div id="activityList"><div class="loading">⏳ Loading...</div></div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <!-- Badges -->
+        <div class="card-box">
+          <div class="section-header"><div class="section-title">🏅 My Badges</div></div>
+          <div class="badges-grid" id="badgesGrid"><div class="loading">⏳</div></div>
+        </div>
+        <!-- Leaderboard -->
+        <div class="card-box">
+          <div class="section-header"><div class="section-title">🏆 Village Rank</div></div>
+          <div id="leaderboardList"><div class="loading">⏳ Loading...</div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── State ──
+let userData       = null;
+let allSubjects    = [];
+let currentLessons = [];
+let currentSubject = null;
+let quizQuestions  = [];
+let currentQ       = 0;
+let userAnswers    = [];
+let currentLessonId = null;
+const avatarColors = ["#10b981","#3b82f6","#f59e0b","#ec4899","#6d28d9","#f97316","#0d7c66","#1d4ed8"];
+const colorClasses = ['c1','c2','c3','c4','c5'];
+
+// ── Fetch helpers ──
+async function api(url) {
+  const r = await fetch(url); return r.json();
+}
+
+// ── INIT ──
+async function init() {
+  const [meRes, subRes, lbRes, actRes] = await Promise.all([
+    api('/api/me'), api('/api/subjects'), api('/api/leaderboard'), api('/api/activity')
+  ]);
+  if (!meRes.success) { window.location = '/'; return; }
+  userData = meRes;
+  allSubjects = subRes.subjects || [];
+  renderProfile(meRes);
+  renderSubjects(subRes.subjects || []);
+  renderBadges(meRes.badges || []);
+  renderLeaderboard(lbRes.leaderboard || []);
+  renderActivity(actRes.activity || []);
+  renderSidebarSubjects(subRes.subjects || []);
+}
+
+// ── Profile ──
+function renderProfile(d) {
+  const u = d.user;
+  const firstName = u.name.split(' ')[0];
+  document.getElementById('heroName').textContent     = firstName;
+  document.getElementById('sidebarName').textContent  = u.name;
+  document.getElementById('sidebarAvatar').textContent = firstName[0].toUpperCase();
+  document.getElementById('sidebarVillage').textContent = '🌾 ' + (u.village || 'Village');
+  document.getElementById('streakCount').textContent  = u.streak;
+  document.getElementById('statLessons').textContent  = d.lessons_done;
+  document.getElementById('statXP').textContent       = u.xp;
+  document.getElementById('statBadges').textContent   = (d.badges || []).length;
+  document.getElementById('statRank').textContent     = '#' + d.rank;
+  document.getElementById('xpAmount').innerHTML       = `${u.xp} <span>/ ${u.level * 200} XP</span>`;
+  document.getElementById('levelBadge').textContent   = `⚡ Level ${u.level}`;
+  document.getElementById('levelNum').textContent     = u.level;
+  document.getElementById('levelTitleTxt').textContent = d.level_title;
+  document.getElementById('levelFrom').textContent    = d.level_title;
+  document.getElementById('levelTo').textContent      = 'Next Level →';
+  document.getElementById('levelSub').textContent     = `${200 - d.xp_in_level} XP to next level`;
+  setTimeout(() => {
+    document.getElementById('xpBar').style.width = d.xp_pct + '%';
+    const offset = 220 - (d.xp_pct / 100) * 220;
+    document.getElementById('ringFill').style.strokeDashoffset = offset;
+  }, 300);
+}
+
+// ── Subjects ──
+function renderSubjects(subjects) {
+  const grid = document.getElementById('subjectsGrid');
+  if (!subjects.length) { grid.innerHTML = '<div class="loading">No subjects yet</div>'; return; }
+  grid.innerHTML = subjects.map((s,i) => {
+    const cc = colorClasses[i % colorClasses.length];
+    return `
+      <div class="subject-card ${cc}" onclick="openSubjectModal(${s.id},'${s.name}','${s.icon}')">
+        <div class="subj-top">
+          <div class="subj-icon">${s.icon}</div>
+          <div style="font-size:0.78rem;font-weight:700;">${s.pct}%</div>
+        </div>
+        <div class="subj-name">${s.name}</div>
+        <div class="subj-bar-track"><div class="subj-bar-fill ${cc}" style="width:${s.pct}%"></div></div>
+        <div class="subj-lessons">${s.done_lessons} / ${s.total_lessons} lessons done</div>
+      </div>`;
+  }).join('');
+}
+
+function renderSidebarSubjects(subjects) {
+  document.getElementById('sidebarSubjects').innerHTML = subjects.map((s,i) =>
+    `<button class="nav-item" onclick="openSubjectModal(${s.id},'${s.name}','${s.icon}')">
+      <span class="icon">${s.icon}</span>${s.name}
+    </button>`
+  ).join('');
+}
+
+// ── Badges ──
+const allBadgeDefs = [
+  {name:"First Step",icon:"🌟"},{name:"Scholar",icon:"🎓"},{name:"Champion",icon:"🏆"},
+  {name:"Week Warrior",icon:"🔥"},{name:"Perfect Score",icon:"💯"},{name:"Village Hero",icon:"🌾"}
+];
+function renderBadges(earned) {
+  const earnedNames = earned.map(b => b.name);
+  document.getElementById('badgesGrid').innerHTML = allBadgeDefs.map(b => `
+    <div class="badge-item ${earnedNames.includes(b.name) ? 'earned' : 'locked'}" title="${b.name}">
+      <div class="badge-icon">${b.icon}</div>
+      <div class="badge-name">${b.name}</div>
+    </div>`
+  ).join('');
+}
+
+// ── Leaderboard ──
+function renderLeaderboard(board) {
+  const rankSymbols = ['🥇','🥈','🥉'];
+  const rankClasses = ['gold','silver','bronze'];
+  const colors2 = ["#10b981","#3b82f6","#f59e0b","#ec4899","#6d28d9","#f97316","#0d7c66","#1d4ed8"];
+  document.getElementById('leaderboardList').innerHTML = board.slice(0,6).map((s,i) => `
+    <div class="lb-row ${s.is_me ? 'me' : ''}">
+      <div class="lb-rank ${rankClasses[i] || ''}">${i < 3 ? rankSymbols[i] : '#'+(i+1)}</div>
+      <div class="lb-avatar" style="background:${colors2[i % colors2.length]}">${s.name[0]}</div>
+      <div class="lb-info">
+        <div class="lb-name">${s.name}${s.is_me ? ' (You)' : ''}</div>
+        <div class="lb-village">🌾 ${s.village || 'Village'}</div>
+      </div>
+      <div class="lb-xp">${s.xp} XP</div>
+    </div>`
+  ).join('');
+}
+
+// ── Activity ──
+function renderActivity(acts) {
+  if (!acts.length) {
+    document.getElementById('activityList').innerHTML = '<div class="loading">No activity yet — start a lesson!</div>';
+    return;
+  }
+  document.getElementById('activityList').innerHTML = acts.map(a => `
+    <div class="activity-item">
+      <div class="act-dot ${a.xp_earned >= 20 ? 'green' : 'gold'}"></div>
+      <div class="act-text">Completed <strong>${a.lesson_title}</strong> in ${a.subject_icon} ${a.subject_name}</div>
+      <div class="act-xp">+${a.xp_earned} XP</div>
+    </div>`
+  ).join('');
+}
+
+// ── Subject → Lesson list modal ──
+async function openSubjectModal(subjectId, subjectName, subjectIcon) {
+  currentSubject = {id: subjectId, name: subjectName, icon: subjectIcon};
+  document.getElementById('mainModal').classList.add('open');
+  document.getElementById('modalContent').innerHTML = `<div class="loading">⏳ Loading lessons...</div>`;
+
+  const data = await api(`/api/subjects/${subjectId}/lessons`);
+  currentLessons = data.lessons || [];
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-title">${subjectIcon} ${subjectName}</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div>
+      ${currentLessons.length === 0 ? '<div class="loading">No lessons yet</div>' :
+        currentLessons.map(l => `
+          <div class="lesson-list-item ${l.completed ? 'done' : ''}" onclick="startLesson(${l.id},'${l.title.replace(/'/g,"\\'")}')">
+            <div class="ll-icon">${l.completed ? '✅' : '📖'}</div>
+            <div class="ll-info">
+              <div class="ll-title">${l.title}</div>
+              <div class="ll-meta">${l.completed ? `Score: ${l.score}% · ${l.xp_earned} XP earned` : 'Not started yet'}</div>
+            </div>
+            <div class="ll-xp">+${l.xp_reward} XP</div>
+          </div>`
+        ).join('')
+      }
+    </div>`;
+}
+
+// ── Open Lesson + Quiz ──
+async function startLesson(lessonId, lessonTitle) {
+  currentLessonId = lessonId;
+  document.getElementById('modalContent').innerHTML = `<div class="loading">⏳ Loading quiz...</div>`;
+  const data = await api(`/api/lessons/${lessonId}/quiz`);
+  quizQuestions = data.questions || [];
+
+  if (!quizQuestions.length) {
+    document.getElementById('modalContent').innerHTML = `
+      <div class="modal-header">
+        <div class="modal-title">📖 ${lessonTitle}</div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div style="padding:1rem;color:var(--muted2);font-size:0.9rem;">
+        <p style="margin-bottom:1rem;line-height:1.6;">${data.lesson.content || 'No content yet.'}</p>
+        <div class="loading">No quiz questions yet for this lesson.</div>
+      </div>`;
+    return;
+  }
+
+  currentQ    = 0;
+  userAnswers = new Array(quizQuestions.length).fill(null);
+  renderQuizQuestion(lessonTitle);
+}
+
+function renderQuizQuestion(title) {
+  const q    = quizQuestions[currentQ];
+  const keys = ['A','B','C','D'];
+  const pips = quizQuestions.map((_,i) =>
+    `<div class="quiz-pip ${i < currentQ ? 'done' : i === currentQ ? 'current' : ''}"></div>`
+  ).join('');
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-title">📝 ${title || currentSubject?.name || 'Quiz'}</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="quiz-progress">${pips}</div>
+    <div style="font-size:0.75rem;color:var(--muted2);margin-bottom:0.4rem;font-weight:600;">Question ${currentQ+1} of ${quizQuestions.length}</div>
+    <div class="quiz-question">${q.question}</div>
+    <div class="quiz-options">
+      ${q.options.map((opt,i) => `
+        <div class="quiz-opt" id="opt-${i}" onclick="selectQuizAnswer(${i})">
+          <div class="opt-key">${keys[i]}</div>${opt}
+        </div>`
+      ).join('')}
+    </div>
+    <div class="quiz-nav">
+      ${currentQ > 0 ? `<button class="btn btn-ghost" onclick="prevQuizQ()">← Back</button>` : ''}
+      <button class="btn btn-primary" onclick="nextQuizQ('${(title||'').replace(/'/g,"\\'")}')">
+        ${currentQ === quizQuestions.length-1 ? 'Submit 🚀' : 'Next →'}
+      </button>
+    </div>`;
+
+  if (userAnswers[currentQ] !== null) {
+    document.getElementById(`opt-${userAnswers[currentQ]}`).classList.add('selected');
+  }
+}
+
+function selectQuizAnswer(i) {
+  userAnswers[currentQ] = i;
+  document.querySelectorAll('.quiz-opt').forEach((el,idx) => el.classList.toggle('selected', idx===i));
+}
+
+function nextQuizQ(title) {
+  if (userAnswers[currentQ] === null) return;
+  if (currentQ < quizQuestions.length - 1) { currentQ++; renderQuizQuestion(title); }
+  else submitQuiz(title);
+}
+function prevQuizQ() { if (currentQ > 0) { currentQ--; renderQuizQuestion(); } }
+
+async function submitQuiz(title) {
+  document.getElementById('modalContent').innerHTML = `<div class="loading">⏳ Submitting...</div>`;
+  const answerMap = {};
+  const keys = ['a','b','c','d'];
+  quizQuestions.forEach((q,i) => { if (userAnswers[i] !== null) answerMap[q.id] = keys[userAnswers[i]]; });
+
+  const res  = await fetch(`/api/lessons/${currentLessonId}/submit`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({answers: answerMap})
+  });
+  const data = await res.json();
+
+  const emoji = data.score >= 80 ? '🎉' : data.score >= 50 ? '👍' : '💪';
+  const msg   = data.score >= 80 ? 'Excellent work!' : data.score >= 50 ? 'Good job!' : "Keep trying!";
+
+  const badgeHTML = (data.new_badges||[]).map(b =>
+    `<div class="new-badge-pill">${b.icon} ${b.name} Unlocked!</div>`
+  ).join('');
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-title">Quiz Complete!</div>
+      <button class="modal-close" onclick="closeModal();init()">✕</button>
+    </div>
+    <div class="result-screen">
+      <div class="result-emoji">${emoji}</div>
+      <div class="result-score">${data.score}%</div>
+      <div class="result-label">${data.correct}/${data.total} correct · ${msg}</div>
+      <div class="result-xp">⚡ +${data.xp_earned} XP Earned!</div>
+      ${badgeHTML ? `<div class="new-badges-row">${badgeHTML}</div>` : ''}
+      <div style="display:flex;gap:0.75rem;justify-content:center;margin-top:0.5rem;">
+        <button class="btn btn-ghost" onclick="startLesson(${currentLessonId},'${(title||'').replace(/'/g,"\\'")}')">🔄 Retry</button>
+        <button class="btn btn-primary" onclick="closeModal();init()">🏠 Dashboard</button>
+      </div>
+    </div>`;
+
+  showToast(`⚡ +${data.xp_earned} XP Earned!`);
+}
+
+async function showLeaderboardModal() {
+  document.getElementById('mainModal').classList.add('open');
+  document.getElementById('modalContent').innerHTML = `<div class="loading">⏳ Loading leaderboard...</div>`;
+  const data = await api('/api/leaderboard');
+  const board = data.leaderboard || [];
+  const rankSymbols = ['🥇','🥈','🥉'];
+  const colors2 = ["#10b981","#3b82f6","#f59e0b","#ec4899","#6d28d9","#f97316","#0d7c66","#1d4ed8"];
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-title">🏆 Village Leaderboard</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div>${board.map((s,i) => `
+      <div class="lb-row ${s.is_me ? 'me' : ''}" style="margin-bottom:4px;">
+        <div class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i<3?rankSymbols[i]:'#'+(i+1)}</div>
+        <div class="lb-avatar" style="background:${colors2[i%colors2.length]}">${s.name[0]}</div>
+        <div class="lb-info">
+          <div class="lb-name">${s.name}${s.is_me?' (You)':''}</div>
+          <div class="lb-village">🌾 ${s.village||'Village'} · Level ${s.level} · 🔥${s.streak}d</div>
+        </div>
+        <div class="lb-xp">${s.xp} XP</div>
+      </div>`).join('')}
+    </div>`;
+}
+
+function closeModal() { document.getElementById('mainModal').classList.remove('open'); }
+document.getElementById('mainModal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+
+function showToast(msg) {
+  const t = document.getElementById('xpToast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>

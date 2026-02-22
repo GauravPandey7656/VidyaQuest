@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VidyaQuest – Teacher</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#f5f0e8;--surface:#fffdf8;--card:#ffffff;--border:#e8e0d0;--ink:#1c1a14;--ink2:#4a4435;--muted:#8c7f6a;--muted2:#b8ab96;--teal:#0d7c66;--teal-lt:#e8f5f1;--amber:#b45309;--amber-lt:#fef3c7;--red:#c0392b;--red-lt:#fdecea;--blue:#1d4ed8;--blue-lt:#eff6ff;--purple:#6d28d9;--purple-lt:#f5f3ff;--font-h:'Playfair Display',serif;--font-b:'DM Sans',sans-serif;--r:14px;--shadow:0 1px 4px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.05);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-b);background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;}
+button,input,select,textarea{font-family:var(--font-b);}
+.layout{display:flex;min-height:100vh;}
+/* SIDEBAR */
+.sidebar{width:250px;flex-shrink:0;background:var(--ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sidebar-brand{padding:1.6rem 1.5rem 1.2rem;border-bottom:1px solid rgba(255,255,255,0.08);}
+.brand-row{display:flex;align-items:center;gap:0.7rem;margin-bottom:0.4rem;}
+.brand-dot{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#ea580c);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.brand-name{font-family:var(--font-h);font-size:1.15rem;color:#fff;}
+.brand-role{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);font-size:0.7rem;font-weight:500;padding:0.2rem 0.6rem;border-radius:20px;}
+.nav-section{padding:1rem 1rem 0;}
+.nav-section-label{font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.12em;padding:0 0.5rem;margin-bottom:0.4rem;}
+.nav-item{display:flex;align-items:center;gap:0.7rem;padding:0.65rem 0.75rem;border-radius:10px;color:rgba(255,255,255,0.55);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.18s;border:none;background:none;width:100%;text-align:left;margin-bottom:2px;}
+.nav-item:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85);}
+.nav-item.active{background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(234,88,12,0.15));color:#fbbf24;border:1px solid rgba(245,158,11,0.25);}
+.sidebar-footer{margin-top:auto;padding:1rem;border-top:1px solid rgba(255,255,255,0.08);}
+.teacher-pill{display:flex;align-items:center;gap:0.7rem;background:rgba(255,255,255,0.06);border-radius:10px;padding:0.7rem;}
+.t-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:800;color:#fff;flex-shrink:0;}
+.t-name{font-size:0.8rem;font-weight:600;color:#fff;}
+.t-sub{font-size:0.68rem;color:rgba(255,255,255,0.4);}
+/* MAIN */
+.main{flex:1;overflow-y:auto;min-width:0;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;}
+.topbar h1{font-family:var(--font-h);font-size:1.35rem;color:var(--ink);}
+.topbar p{font-size:0.78rem;color:var(--muted);margin-top:1px;}
+.btn-add{display:flex;align-items:center;gap:0.5rem;background:var(--teal);color:#fff;border:none;border-radius:10px;padding:0.5rem 1rem;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-add:hover{background:#0a6b57;transform:translateY(-1px);box-shadow:0 4px 12px rgba(13,124,102,0.3);}
+.content{padding:1.8rem 2rem;display:flex;flex-direction:column;gap:1.5rem;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;animation:fadeUp 0.5s ease both;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem 1.3rem;box-shadow:var(--shadow);display:flex;align-items:flex-start;justify-content:space-between;transition:transform 0.2s;}
+.stat-card:hover{transform:translateY(-3px);}
+.stat-left .val{font-family:var(--font-h);font-size:2rem;font-weight:700;line-height:1;}
+.stat-left .lbl{font-size:0.72rem;color:var(--muted);margin-top:0.25rem;}
+.stat-left .delta{font-size:0.7rem;font-weight:600;margin-top:0.4rem;}
+.delta.up{color:var(--teal);}.delta.dn{color:var(--red);}
+.stat-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.si-teal{background:var(--teal-lt);}.si-amber{background:var(--amber-lt);}.si-blue{background:var(--blue-lt);}.si-purple{background:var(--purple-lt);}
+/* GRID */
+.main-grid{display:grid;grid-template-columns:1fr 360px;gap:1.5rem;animation:fadeUp 0.5s 0.1s ease both;}
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.sec-title{font-family:var(--font-h);font-size:1.05rem;color:var(--ink);}
+.sec-action{font-size:0.75rem;color:var(--teal);cursor:pointer;font-weight:600;border:none;background:none;}
+/* TABLE */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;}
+.table-filters{padding:1rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;}
+.filter-pill{padding:0.3rem 0.8rem;border-radius:20px;border:1px solid var(--border);background:var(--bg);font-size:0.75rem;font-weight:500;cursor:pointer;transition:all 0.18s;color:var(--ink2);}
+.filter-pill:hover{border-color:var(--teal);color:var(--teal);}
+.filter-pill.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--bg);}
+th{padding:0.7rem 1rem;text-align:left;font-size:0.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:0.75rem 1rem;border-bottom:1px solid var(--border);font-size:0.82rem;color:var(--ink2);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:#faf8f4;}
+.student-cell{display:flex;align-items:center;gap:0.7rem;}
+.s-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;flex-shrink:0;}
+.s-name{font-weight:600;color:var(--ink);}
+.s-village{font-size:0.68rem;color:var(--muted);}
+.prog-bar{width:70px;height:6px;background:var(--bg);border-radius:999px;overflow:hidden;display:inline-block;}
+.prog-fill{height:100%;border-radius:999px;}
+.prog-fill.high{background:linear-gradient(90deg,var(--teal),#34d399);}
+.prog-fill.mid{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+.prog-fill.low{background:linear-gradient(90deg,var(--red),#f87171);}
+.badge-chip{display:inline-flex;align-items:center;gap:0.3rem;padding:0.18rem 0.55rem;border-radius:20px;font-size:0.68rem;font-weight:600;}
+.chip-green{background:var(--teal-lt);color:var(--teal);}
+.chip-amber{background:var(--amber-lt);color:var(--amber);}
+.chip-red{background:var(--red-lt);color:var(--red);}
+/* RIGHT COL */
+.right-col{display:flex;flex-direction:column;gap:1rem;}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:1.3rem;}
+.form-group{margin-bottom:0.9rem;}
+.form-group label{display:block;font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.35rem;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:0.6rem 0.75rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--ink);font-size:0.83rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;resize:vertical;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,124,102,0.1);background:#fff;}
+.xp-row{display:flex;gap:0.6rem;}
+.xp-row .form-group{flex:1;}
+.btn-form{width:100%;padding:0.7rem;border:none;border-radius:10px;background:linear-gradient(135deg,var(--teal),#0a9b80);color:#fff;font-size:0.88rem;font-weight:700;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 12px rgba(13,124,102,0.25);margin-top:0.4rem;}
+.btn-form:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(13,124,102,0.35);}
+.btn-form:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+/* Lessons list */
+.lesson-item{display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0;border-bottom:1px solid var(--border);}
+.lesson-item:last-child{border-bottom:none;}
+.lesson-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.lesson-info{flex:1;min-width:0;}
+.lesson-name{font-size:0.83rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lesson-meta{font-size:0.68rem;color:var(--muted);margin-top:1px;}
+.lesson-xp{font-size:0.72rem;font-weight:700;background:var(--amber-lt);color:var(--amber);padding:0.15rem 0.5rem;border-radius:20px;}
+/* Alerts */
+.alert-item{display:flex;align-items:flex-start;gap:0.7rem;padding:0.7rem 0.75rem;border-radius:10px;margin-bottom:0.5rem;border:1px solid;}
+.alert-item.warn{background:var(--amber-lt);border-color:rgba(180,83,9,0.2);}
+.alert-item.info{background:var(--blue-lt);border-color:rgba(29,78,216,0.15);}
+.alert-item.success{background:var(--teal-lt);border-color:rgba(13,124,102,0.2);}
+.alert-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.alert-title{font-size:0.8rem;font-weight:700;color:var(--ink);}
+.alert-sub{font-size:0.7rem;color:var(--muted);margin-top:1px;}
+/* Chart */
+.chart-area{display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:0.5rem;}
+.bar-group{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.chart-bar{width:100%;border-radius:6px 6px 0 0;min-height:4px;cursor:pointer;position:relative;}
+.chart-bar:hover::after{content:attr(data-val);position:absolute;top:-20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:0.65rem;padding:2px 6px;border-radius:4px;}
+.bar-label{font-size:0.62rem;color:var(--muted);text-align:center;}
+/* Quiz section */
+.option-row{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.6rem;}
+.opt-wrap{position:relative;}
+.opt-label{position:absolute;left:0.6rem;top:50%;transform:translateY(-50%);font-size:0.7rem;font-weight:700;color:var(--muted);background:var(--border);border-radius:4px;padding:1px 5px;z-index:1;}
+.opt-wrap input{padding-left:2rem;}
+.ans-row{display:flex;gap:0.5rem;}
+.ans-btn{flex:1;padding:0.45rem;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-size:0.75rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.18s;text-align:center;}
+.ans-btn.selected{background:var(--teal);color:#fff;border-color:var(--teal);}
+/* Modal */
+.modal-tabs{display:flex;gap:4px;background:var(--bg);border-radius:10px;padding:4px;margin-bottom:1.2rem;}
+.modal-tab{flex:1;padding:0.5rem;border:none;background:none;font-size:0.8rem;font-weight:600;color:var(--muted);border-radius:8px;cursor:pointer;transition:all 0.18s;}
+.modal-tab.active{background:#fff;color:var(--teal);box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+/* Toast */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:200;background:var(--ink);color:#fff;padding:0.7rem 1.2rem;border-radius:50px;font-size:0.83rem;font-weight:600;transform:translateY(60px);opacity:0;transition:all 0.35s cubic-bezier(.22,1,.36,1);box-shadow:0 8px 24px rgba(0,0,0,0.2);pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.loading{display:flex;align-items:center;justify-content:center;padding:2rem;color:var(--muted2);}
+::-webkit-scrollbar{width:5px;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-row">
+        <div class="brand-dot">🏫</div>
+        <div class="brand-name">VidyaQuest</div>
+      </div>
+      <span class="brand-role">👩‍🏫 Teacher Portal</span>
+    </div>
+    <div class="nav-section" style="margin-top:0.5rem;">
+      <div class="nav-section-label">Dashboard</div>
+      <button class="nav-item active"><span>🏠</span> Overview</button>
+      <button class="nav-item"><span>👥</span> My Students</button>
+      <button class="nav-item"><span>📊</span> Analytics</button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Content</div>
+      <button class="nav-item"><span>📖</span> All Lessons</button>
+      <button class="nav-item"><span>🧩</span> Quizzes</button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Account</div>
+      <button class="nav-item" onclick="window.location='/logout'"><span>🚪</span> Logout</button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="teacher-pill">
+        <div class="t-avatar" id="teacherAvatar">T</div>
+        <div>
+          <div class="t-name" id="teacherName">Loading...</div>
+          <div class="t-sub" id="teacherVillage">🌾 —</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Teacher Dashboard</h1>
+        <p id="topbarDate">Loading...</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <input type="text" id="searchInput" placeholder="🔍  Search students..." oninput="filterStudents()" style="padding:0.45rem 0.8rem;border:1px solid var(--border);border-radius:10px;background:var(--bg);font-size:0.82rem;outline:none;width:200px;"/>
+        <button class="btn-add" onclick="document.getElementById('addLessonForm').scrollIntoView({behavior:'smooth'})">＋ Add Content</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-left"><div class="val" id="statStudents">—</div><div class="lbl">Total Students</div><div class="delta up" id="statStudentsDelta">Loading...</div></div><div class="stat-icon si-teal">👥</div></div>
+        <div class="stat-card"><div class="stat-left"><div class="val" id="statAvg">—</div><div class="lbl">Avg Class Score</div><div class="delta up">↑ vs last week</div></div><div class="stat-icon si-amber">📊</div></div>
+        <div class="stat-card"><div class="stat-left"><div class="val" id="statLessons">—</div><div class="lbl">Lessons Published</div><div class="delta up" id="statLessonsDelta">↑ this week</div></div><div class="stat-icon si-blue">📚</div></div>
+        <div class="stat-card"><div class="stat-left"><div class="val" id="statRisk">—</div><div class="lbl">Need Attention</div><div class="delta dn">Score below 50%</div></div><div class="stat-icon si-purple">⚠️</div></div>
+      </div>
+
+      <!-- MAIN GRID -->
+      <div class="main-grid">
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+
+          <!-- STUDENT TABLE -->
+          <div class="table-card">
+            <div style="padding:1rem 1.2rem 0;">
+              <div class="sec-header">
+                <div class="sec-title">Student Progress</div>
+                <button class="sec-action">Export →</button>
+              </div>
+            </div>
+            <div class="table-filters">
+              <button class="filter-pill active" onclick="setFilter('all',this)">All</button>
+              <button class="filter-pill" onclick="setFilter('top',this)">🏆 Top</button>
+              <button class="filter-pill" onclick="setFilter('risk',this)">⚠️ At Risk</button>
+            </div>
+            <div style="overflow-x:auto;">
+              <table>
+                <thead><tr><th>Student</th><th>Grade</th><th>Avg Score</th><th>XP</th><th>Streak</th><th>Status</th></tr></thead>
+                <tbody id="studentBody"><tr><td colspan="6"><div class="loading">⏳ Loading students...</div></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- CHART -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:1.3rem;">
+            <div class="sec-header">
+              <div class="sec-title">Weekly Quiz Scores (Class Avg)</div>
+              <span style="font-size:0.72rem;color:var(--muted);">Last 7 days</span>
+            </div>
+            <div class="chart-area" id="chartArea"><div class="loading">⏳</div></div>
+            <div style="display:flex;gap:1.5rem;margin-top:1rem;">
+              <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.72rem;color:var(--muted);"><div style="width:10px;height:10px;border-radius:2px;background:var(--teal)"></div>Math</div>
+              <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.72rem;color:var(--muted);"><div style="width:10px;height:10px;border-radius:2px;background:#f59e0b"></div>Science</div>
+              <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.72rem;color:var(--muted);"><div style="width:10px;height:10px;border-radius:2px;background:#6d28d9"></div>English</div>
+            </div>
+          </div>
+
+          <!-- ALERTS -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:1.3rem;">
+            <div class="sec-header"><div class="sec-title">🔔 Alerts</div></div>
+            <div id="alertsBox">
+              <div class="alert-item info"><div class="alert-icon">📌</div><div><div class="alert-title">Loading alerts...</div></div></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COL -->
+        <div class="right-col">
+          <!-- ADD LESSON FORM -->
+          <div class="form-card" id="addLessonForm">
+            <div class="sec-header"><div class="sec-title">➕ Add Lesson</div></div>
+            <div class="modal-tabs">
+              <button class="modal-tab active" onclick="switchFormTab('lesson',this)">📖 Lesson</button>
+              <button class="modal-tab" onclick="switchFormTab('quiz',this)">🧩 Quiz Q</button>
+            </div>
+
+            <!-- Lesson tab -->
+            <div id="form-lesson">
+              <div class="form-group">
+                <label>Subject</label>
+                <select id="f-subject"></select>
+              </div>
+              <div class="form-group">
+                <label>Lesson Title</label>
+                <input type="text" id="f-title" placeholder="e.g. Introduction to Fractions"/>
+              </div>
+              <div class="form-group">
+                <label>Content</label>
+                <textarea id="f-content" rows="3" placeholder="Write lesson content..."></textarea>
+              </div>
+              <div class="xp-row">
+                <div class="form-group"><label>XP Reward</label><input type="number" id="f-xp" value="20" min="5" max="100"/></div>
+                <div class="form-group"><label>Order #</label><input type="number" id="f-order" value="1" min="1"/></div>
+              </div>
+              <button class="btn-form" id="lessonBtn" onclick="submitLesson()">📖 Publish Lesson</button>
+            </div>
+
+            <!-- Quiz tab -->
+            <div id="form-quiz" style="display:none;">
+              <div class="form-group">
+                <label>Lesson</label>
+                <select id="q-lesson"></select>
+              </div>
+              <div class="form-group">
+                <label>Question</label>
+                <input type="text" id="q-question" placeholder="Type the question..."/>
+              </div>
+              <div class="form-group">
+                <label>Options</label>
+                <div class="option-row">
+                  <div class="opt-wrap"><span class="opt-label">A</span><input type="text" id="q-a" placeholder="Option A"/></div>
+                  <div class="opt-wrap"><span class="opt-label">B</span><input type="text" id="q-b" placeholder="Option B"/></div>
+                  <div class="opt-wrap"><span class="opt-label">C</span><input type="text" id="q-c" placeholder="Option C"/></div>
+                  <div class="opt-wrap"><span class="opt-label">D</span><input type="text" id="q-d" placeholder="Option D"/></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Correct Answer</label>
+                <div class="ans-row">
+                  <button class="ans-btn" onclick="selectAns(this,'a')">A</button>
+                  <button class="ans-btn" onclick="selectAns(this,'b')">B</button>
+                  <button class="ans-btn" onclick="selectAns(this,'c')">C</button>
+                  <button class="ans-btn" onclick="selectAns(this,'d')">D</button>
+                </div>
+              </div>
+              <button class="btn-form" id="quizBtn" onclick="submitQuiz()">🧩 Save Question</button>
+            </div>
+          </div>
+
+          <!-- RECENT LESSONS -->
+          <div class="form-card">
+            <div class="sec-header">
+              <div class="sec-title">📋 My Lessons</div>
+              <button class="sec-action" onclick="loadLessons()">Refresh ↻</button>
+            </div>
+            <div id="lessonsList"><div class="loading">⏳</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+let allStudents = []; let activeFilter = 'all'; let selectedAnswer = null;
+let subjects = []; let lessonsList = [];
+const avatarColors = ["#10b981","#3b82f6","#f59e0b","#ec4899","#6d28d9","#f97316","#0d7c66","#1d4ed8"];
+
+async function api(url, opts={}) {
+  const r = await fetch(url, opts); return r.json();
+}
+
+async function init() {
+  // Date
+  document.getElementById('topbarDate').textContent = new Date().toLocaleDateString('en-IN', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) + ' · Teacher Portal';
+
+  const [statsRes, studentsRes, subjectsRes, lessonsRes, chartRes] = await Promise.all([
+    api('/api/teacher/stats'),
+    api('/api/teacher/students'),
+    api('/api/subjects'),
+    api('/api/teacher/lessons'),
+    api('/api/teacher/weekly_scores')
+  ]);
+
+  // Teacher info from session via me endpoint
+  const meRes = await api('/api/me');
+  if (meRes.success) {
+    const u = meRes.user;
+    document.getElementById('teacherName').textContent   = u.name;
+    document.getElementById('teacherAvatar').textContent = u.name[0];
+    document.getElementById('teacherVillage').textContent = '🌾 ' + (u.village || 'Village') + ' School';
+  }
+
+  // Stats
+  if (statsRes.success) {
+    const s = statsRes.stats;
+    document.getElementById('statStudents').textContent = s.students;
+    document.getElementById('statAvg').textContent      = s.avg_score + '%';
+    document.getElementById('statLessons').textContent  = s.lessons;
+    document.getElementById('statRisk').textContent     = s.at_risk;
+  }
+
+  // Students
+  if (studentsRes.success) {
+    allStudents = studentsRes.students;
+    renderStudents();
+    renderAlerts(allStudents);
+  }
+
+  // Subjects
+  if (subjectsRes.success) {
+    subjects = subjectsRes.subjects;
+    const subjectSelect = document.getElementById('f-subject');
+    subjectSelect.innerHTML = subjects.map(s => `<option value="${s.id}">${s.icon} ${s.name}</option>`).join('');
+  }
+
+  // Lessons
+  if (lessonsRes.success) {
+    lessonsList = lessonsRes.lessons;
+    renderLessonsList(lessonsList);
+    populateLessonDropdown(lessonsList);
+  }
+
+  // Chart
+  if (chartRes.success) renderChart(chartRes.data);
+}
+
+function renderStudents() {
+  const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const list   = allStudents.filter(s => {
+    const matchFilter = activeFilter === 'all' ? true
+      : activeFilter === 'top'  ? s.avg_score >= 70
+      : activeFilter === 'risk' ? s.avg_score < 50
+      : true;
+    const matchSearch = !search || s.name.toLowerCase().includes(search) || (s.grade||'').toLowerCase().includes(search);
+    return matchFilter && matchSearch;
+  });
+
+  document.getElementById('studentBody').innerHTML = list.length === 0
+    ? `<tr><td colspan="6"><div class="loading">No students found</div></td></tr>`
+    : list.map((s,i) => {
+        const sc    = Math.round(s.avg_score);
+        const pCls  = sc >= 70 ? 'high' : sc >= 50 ? 'mid' : 'low';
+        const status = sc >= 70 ? ['chip-green','🏆 Top'] : sc >= 50 ? ['chip-amber','⚡ Active'] : ['chip-red','⚠️ At Risk'];
+        return `<tr>
+          <td><div class="student-cell">
+            <div class="s-av" style="background:${avatarColors[i%avatarColors.length]}">${s.name[0]}</div>
+            <div><div class="s-name">${s.name}</div><div class="s-village">${s.lessons_done} lessons done</div></div>
+          </div></td>
+          <td>${s.grade||'—'}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div class="prog-bar"><div class="prog-fill ${pCls}" style="width:${sc}%"></div></div>
+              <span style="font-size:0.75rem;font-weight:700;">${sc}%</span>
+            </div>
+          </td>
+          <td><strong>${s.xp}</strong></td>
+          <td>${s.streak > 0 ? `🔥 ${s.streak}d` : '—'}</td>
+          <td><span class="badge-chip ${status[0]}">${status[1]}</span></td>
+        </tr>`;
+      }).join('');
+}
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderStudents();
+}
+
+function filterStudents() { renderStudents(); }
+
+function renderAlerts(students) {
+  const atRisk  = students.filter(s => s.avg_score < 50);
+  const noLogin = students.filter(s => s.streak === 0);
+  const top     = students.find(s => s.avg_score >= 90);
+  let html = '';
+  if (atRisk.length) html += `<div class="alert-item warn"><div class="alert-icon">⚠️</div><div><div class="alert-title">${atRisk.length} student${atRisk.length>1?'s':''} scored below 50%</div><div class="alert-sub">${atRisk.map(s=>s.name).slice(0,3).join(', ')}${atRisk.length>3?' +more':''} · Review recent lessons</div></div></div>`;
+  if (noLogin.length) html += `<div class="alert-item info"><div class="alert-icon">📌</div><div><div class="alert-title">${noLogin.length} student${noLogin.length>1?'s':''} have no active streak</div><div class="alert-sub">Consider sending them a reminder</div></div></div>`;
+  if (top) html += `<div class="alert-item success"><div class="alert-icon">🎉</div><div><div class="alert-title">${top.name} is your top performer!</div><div class="alert-sub">${Math.round(top.avg_score)}% average · ${top.xp} XP · Level ${top.level}</div></div></div>`;
+  if (!html) html = `<div class="alert-item success"><div class="alert-icon">✅</div><div><div class="alert-title">All students are performing well!</div></div></div>`;
+  document.getElementById('alertsBox').innerHTML = html;
+}
+
+function renderLessonsList(lessons) {
+  const subjColors = {'Mathematics':'#3b82f6','Science':'#10b981','English':'#8b5cf6','Social Studies':'#f59e0b','Hindi':'#ec4899'};
+  document.getElementById('lessonsList').innerHTML = lessons.length === 0
+    ? '<div class="loading">No lessons yet. Add your first one!</div>'
+    : lessons.slice(0,6).map(l => `
+        <div class="lesson-item">
+          <div class="lesson-dot" style="background:${subjColors[l.subject_name]||'#888'}"></div>
+          <div class="lesson-info">
+            <div class="lesson-name">${l.title}</div>
+            <div class="lesson-meta">${l.subject_icon} ${l.subject_name} · ${l.completions} completions</div>
+          </div>
+          <div class="lesson-xp">+${l.xp_reward} XP</div>
+        </div>`
+      ).join('');
+}
+
+function populateLessonDropdown(lessons) {
+  document.getElementById('q-lesson').innerHTML = lessons.length === 0
+    ? '<option>No lessons yet</option>'
+    : lessons.map(l => `<option value="${l.id}">${l.subject_icon} ${l.title}</option>`).join('');
+}
+
+function renderChart(data) {
+  if (!data || !data.length) return;
+  const maxH = 100;
+  document.getElementById('chartArea').innerHTML = data.map(d => `
+    <div class="bar-group">
+      <div style="display:flex;align-items:flex-end;gap:2px;height:${maxH}px;">
+        <div class="chart-bar" data-val="${d.math||0}%" style="background:var(--teal);width:10px;height:${((d.math||0)/100)*maxH}px;opacity:0.85;"></div>
+        <div class="chart-bar" data-val="${d.sci||0}%" style="background:#f59e0b;width:10px;height:${((d.sci||0)/100)*maxH}px;opacity:0.85;"></div>
+        <div class="chart-bar" data-val="${d.eng||0}%" style="background:#6d28d9;width:10px;height:${((d.eng||0)/100)*maxH}px;opacity:0.85;"></div>
+      </div>
+      <div class="bar-label">${d.day}</div>
+    </div>`
+  ).join('');
+}
+
+// ── Form tabs ──
+function switchFormTab(tab, btn) {
+  document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('form-lesson').style.display = tab === 'lesson' ? 'block' : 'none';
+  document.getElementById('form-quiz').style.display   = tab === 'quiz'   ? 'block' : 'none';
+}
+
+function selectAns(btn, val) {
+  selectedAnswer = val;
+  document.querySelectorAll('.ans-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+async function submitLesson() {
+  const subject_id = document.getElementById('f-subject').value;
+  const title      = document.getElementById('f-title').value.trim();
+  const content    = document.getElementById('f-content').value.trim();
+  const xp_reward  = document.getElementById('f-xp').value;
+  const order_num  = document.getElementById('f-order').value;
+  if (!title || !content) { showToast('⚠️ Title and content are required!'); return; }
+  const btn = document.getElementById('lessonBtn');
+  btn.disabled = true; btn.textContent = '⏳ Publishing...';
+  try {
+    const res  = await fetch('/api/teacher/lessons', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({subject_id, title, content, xp_reward: parseInt(xp_reward), order_num: parseInt(order_num)})
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ ' + data.message);
+      document.getElementById('f-title').value   = '';
+      document.getElementById('f-content').value = '';
+      await loadLessons();
+    } else {
+      showToast('❌ ' + (data.message || 'Failed'));
+    }
+  } catch(e) { showToast('❌ Server error'); }
+  btn.disabled = false; btn.textContent = '📖 Publish Lesson';
+}
+
+async function submitQuiz() {
+  const lesson_id = document.getElementById('q-lesson').value;
+  const question  = document.getElementById('q-question').value.trim();
+  const options   = [
+    document.getElementById('q-a').value.trim(),
+    document.getElementById('q-b').value.trim(),
+    document.getElementById('q-c').value.trim(),
+    document.getElementById('q-d').value.trim()
+  ];
+  if (!question || options.some(o => !o) || !selectedAnswer) {
+    showToast('⚠️ Fill all fields and select correct answer!'); return;
+  }
+  const btn = document.getElementById('quizBtn');
+  btn.disabled = true; btn.textContent = '⏳ Saving...';
+  try {
+    const res  = await fetch('/api/teacher/quiz', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({lesson_id: parseInt(lesson_id), question, options, answer: selectedAnswer})
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ ' + data.message);
+      document.getElementById('q-question').value = '';
+      ['q-a','q-b','q-c','q-d'].forEach(id => document.getElementById(id).value = '');
+      document.querySelectorAll('.ans-btn').forEach(b => b.classList.remove('selected'));
+      selectedAnswer = null;
+    } else { showToast('❌ ' + (data.message || 'Failed')); }
+  } catch(e) { showToast('❌ Server error'); }
+  btn.disabled = false; btn.textContent = '🧩 Save Question';
+}
+
+async function loadLessons() {
+  const data = await api('/api/teacher/lessons');
+  if (data.success) {
+    lessonsList = data.lessons;
+    renderLessonsList(lessonsList);
+    populateLessonDropdown(lessonsList);
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+init();
+</script>
+</body>
+</html>
