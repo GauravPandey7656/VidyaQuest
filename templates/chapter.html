@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Chapter{% endblock %}
+
+{% block content %}
+
+<div class="max-w-6xl mx-auto p-8">
+
+    <a href="javascript:history.back()"
+       class="text-indigo-600 font-semibold">
+        ← Back
+    </a>
+
+    <h1 id="chapterTitle"
+        class="text-4xl font-bold mt-4 mb-8">
+        Chapter
+    </h1>
+
+    <div id="lessonGrid"
+         class="grid md:grid-cols-2 gap-6">
+    </div>
+
+</div>
+
+<script>
+
+const chapterId = {{ chapter_id | tojson }};
+
+async function loadLessons(){
+
+    const res =
+        await fetch(`/api/chapters/${chapterId}/lessons`);
+
+    const data = await res.json();
+
+    const grid =
+        document.getElementById('lessonGrid');
+
+    grid.innerHTML='';
+
+    data.lessons.forEach(lesson => {
+
+        const completed =
+            lesson.completed ? '✅' : '📖';
+
+        grid.innerHTML += `
+        <div class="bg-white shadow-lg rounded-xl p-6">
+
+            <h2 class="text-2xl font-bold">
+                ${completed} ${lesson.title}
+            </h2>
+
+            <p class="mt-3 text-gray-600">
+                XP Reward: ${lesson.xp_reward}
+            </p>
+
+            <a
+                href="/lesson/${lesson.id}"
+                class="inline-block mt-4 bg-indigo-600 text-white px-4 py-2 rounded-lg">
+
+                Open Lesson
+
+            </a>
+
+        </div>
+        `;
+    });
+
+}
+
+loadLessons();
+
+</script>
+
+{% endblock %}
+

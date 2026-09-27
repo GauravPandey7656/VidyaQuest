@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Lesson{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto p-8">
+
+    <a href="javascript:history.back()"
+       class="text-indigo-600 font-semibold">
+        ← Back
+    </a>
+
+    <div class="bg-white shadow-lg rounded-xl p-8 mt-6">
+
+        <h1 id="lessonTitle"
+            class="text-4xl font-bold mb-6">
+            Loading...
+        </h1>
+
+        <div id="lessonContent"
+             class="prose max-w-none text-lg">
+        </div>
+
+        <div id="lessonMedia" class="mt-6">
+            <!-- Optional video/image injected by JS -->
+        </div>
+
+
+        <button
+            onclick="completeLesson()"
+            class="mt-8 bg-green-600 text-white px-6 py-3 rounded-lg">
+
+            ✅ Mark Complete
+
+        </button>
+
+        <a href="/lesson/{{ lesson_id }}/quiz"
+           class="inline-block ml-3 bg-indigo-600 text-white px-6 py-3 rounded-lg">
+
+            📝 Take Quiz
+
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+
+const lessonId = {{ lesson_id }};
+
+async function loadLesson(){
+
+    const res = await fetch(`/api/lesson/${lessonId}`);
+
+
+    const data = await res.json();
+
+    document.getElementById('lessonTitle')
+        .innerText = data.lesson.title;
+
+    document.getElementById('lessonContent').innerHTML = `
+
+        ${data.lesson.image_url ? `<img src="${data.lesson.image_url}"
+                class="rounded-xl mb-6 w-full">` : ''}
+
+        ${data.lesson.video_url ? `
+        <iframe
+            class="w-full h-96 rounded-xl mb-6"
+            src="${data.lesson.video_url}"
+            allowfullscreen>
+        </iframe>
+        ` : ''}
+
+        <p class="text-lg">
+            ${data.lesson.content}
+        </p>
+    `;
+
+
+
+    // Media is rendered inside #lessonContent via innerHTML above.
+    // (Kept #lessonMedia in markup for backward compatibility.)
+    document.getElementById('lessonMedia').innerHTML = '';
+
+}
+
+
+async function completeLesson(){
+
+    const res = await fetch(
+        `/api/lesson/${lessonId}/complete`,
+        {method:'POST'}
+    );
+
+    const data = await res.json();
+
+    if(data.success){
+        alert(`+${data.xp} XP Earned!`);
+        location.reload();
+    }
+}
+
+loadLesson();
+
+</script>
+
+{% endblock %}
+

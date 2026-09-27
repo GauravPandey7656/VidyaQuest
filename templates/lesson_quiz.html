@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto p-8">
+
+    <h1 class="text-4xl font-bold mb-8">
+        📝 Quiz
+    </h1>
+
+    <div id="quizArea">
+    </div>
+
+    <button
+        onclick="submitQuiz()"
+        class="mt-8 bg-green-600 text-white px-6 py-3 rounded-lg">
+
+        Submit Quiz
+
+    </button>
+
+</div>
+
+<script>
+
+const lessonId = {{ lesson_id }};
+
+async function loadQuiz(){
+
+    const res =
+        await fetch(`/api/lessons/${lessonId}/quiz`);
+
+    const data = await res.json();
+
+    let html = '';
+
+    data.questions.forEach((q,index)=>{
+
+        html += `
+        <div class="bg-white p-6 rounded-xl shadow mb-6">
+
+            <h2 class="font-bold text-xl mb-4">
+                ${index+1}. ${q.question}
+            </h2>
+
+            ${q.options.map((opt,i)=>
+                `
+                    <label class="block mb-2">
+                        <input
+                            type="radio"
+                            name="q_${q.id}"
+                            value="${['a','b','c','d'][i]}">
+                        ${opt}
+                    </label>
+                `
+            ).join('')}
+
+        </div>
+        `;
+    });
+
+    document.getElementById('quizArea').innerHTML = html;
+}
+
+async function submitQuiz(){
+
+    const answers = {};
+
+    document
+        .querySelectorAll('input[type=radio]:checked')
+        .forEach(el => {
+
+            const qid =
+                el.name.replace('q_','');
+
+            answers[qid] = el.value;
+        });
+
+    const res =
+        await fetch(`/api/lessons/${lessonId}/submit`,{
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify({
+                answers
+            })
+        });
+
+    const data = await res.json();
+
+    alert(data.message);
+
+    window.location = `/quiz-result?score=${data.score}&xp=${data.xp_earned}&level=${data.level}`;
+
+}
+
+
+loadQuiz();
+
+</script>
+
+{% endblock %}
+

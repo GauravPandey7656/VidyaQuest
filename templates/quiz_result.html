@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz Results{% endblock %}
+
+{% block content %}
+
+<div class="max-w-3xl mx-auto p-8">
+
+    <div class="bg-white shadow-xl rounded-2xl p-10 text-center">
+
+        <div class="text-7xl mb-4">
+            🏆
+        </div>
+
+        <h1 class="text-4xl font-bold mb-6">
+            Quiz Completed!
+        </h1>
+
+        <div id="resultArea">
+        </div>
+
+        <a href="/dashboard"
+           class="inline-block mt-8 bg-indigo-600 text-white px-6 py-3 rounded-lg">
+
+            Back to Dashboard
+
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+
+const params =
+    new URLSearchParams(window.location.search);
+
+document.getElementById('resultArea').innerHTML = `
+    <h2 class="text-3xl font-bold mb-4">
+        Score: ${params.get('score')}%
+    </h2>
+
+    <p class="text-xl mb-3">
+        XP Earned: +${params.get('xp')}
+    </p>
+
+    <p class="text-lg text-gray-600">
+        Level: ${params.get('level')}
+    </p>
+`;
+
+</script>
+
+{% endblock %}
+

@@ -10,6 +10,8 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--font-b);background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;}
 button,input,select,textarea{font-family:var(--font-b);}
+label.block{display:block;}
+
 .layout{display:flex;min-height:100vh;}
 /* SIDEBAR */
 .sidebar{width:250px;flex-shrink:0;background:var(--ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
@@ -173,7 +175,7 @@ tbody tr:hover{background:#faf8f4;}
   <main class="main">
     <div class="topbar">
       <div>
-        <h1>Teacher Dashboard</h1>
+        <h1>Teacher Analytics Dashboard</h1>
         <p id="topbarDate">Loading...</p>
       </div>
       <div style="display:flex;align-items:center;gap:0.75rem;">
@@ -184,11 +186,28 @@ tbody tr:hover{background:#faf8f4;}
 
     <div class="content">
       <!-- STATS -->
+
+      <div
+        id="analyticsCards"
+        class="grid md:grid-cols-4 gap-6 mt-8 mb-8">
+      </div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-left"><div class="val" id="statStudents">—</div><div class="lbl">Total Students</div><div class="delta up" id="statStudentsDelta">Loading...</div></div><div class="stat-icon si-teal">👥</div></div>
         <div class="stat-card"><div class="stat-left"><div class="val" id="statAvg">—</div><div class="lbl">Avg Class Score</div><div class="delta up">↑ vs last week</div></div><div class="stat-icon si-amber">📊</div></div>
         <div class="stat-card"><div class="stat-left"><div class="val" id="statLessons">—</div><div class="lbl">Lessons Published</div><div class="delta up" id="statLessonsDelta">↑ this week</div></div><div class="stat-icon si-blue">📚</div></div>
         <div class="stat-card"><div class="stat-left"><div class="val" id="statRisk">—</div><div class="lbl">Need Attention</div><div class="delta dn">Score below 50%</div></div><div class="stat-icon si-purple">⚠️</div></div>
+      </div>
+
+      <div
+        class="bg-white rounded-xl shadow p-6 mt-8">
+
+        <h2 class="text-2xl font-bold mb-6">
+          🏆 Top Students
+        </h2>
+
+        <div id="topStudents">
+        </div>
+
       </div>
 
       <!-- MAIN GRID -->
@@ -257,12 +276,39 @@ tbody tr:hover{background:#faf8f4;}
                 <select id="f-subject"></select>
               </div>
               <div class="form-group">
+                <label class="block mt-4 font-semibold">
+                  Chapter
+                </label>
+                <select id="chapterId" class="w-full border rounded-lg p-3"></select>
+              </div>
+              <div class="form-group">
                 <label>Lesson Title</label>
                 <input type="text" id="f-title" placeholder="e.g. Introduction to Fractions"/>
               </div>
+
               <div class="form-group">
                 <label>Content</label>
                 <textarea id="f-content" rows="3" placeholder="Write lesson content..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="block mt-4 font-semibold">
+                  Image URL
+                </label>
+                <input
+                  id="f-imageUrl"
+                  type="text"
+                  placeholder="https://example.com/image.jpg"
+                  class="w-full border rounded-lg p-3"/>
+              </div>
+              <div class="form-group">
+                <label class="block mt-4 font-semibold">
+                  Video URL
+                </label>
+                <input
+                  id="f-videoUrl"
+                  type="text"
+                  placeholder="https://www.youtube.com/embed/VIDEO_ID"
+                  class="w-full border rounded-lg p-3"/>
               </div>
               <div class="xp-row">
                 <div class="form-group"><label>XP Reward</label><input type="number" id="f-xp" value="20" min="5" max="100"/></div>
@@ -326,6 +372,46 @@ async function api(url, opts={}) {
   const r = await fetch(url, opts); return r.json();
 }
 
+async function loadAnalytics(){
+
+    const res =
+        await fetch('/api/teacher/analytics');
+
+    const data = await res.json();
+
+    document.getElementById('analyticsCards')
+        .innerHTML = `
+
+        <div class="bg-white p-6 rounded-xl shadow">
+            <h3 class="text-gray-500">Students</h3>
+            <div class="text-4xl font-bold">
+                ${data.total_students}
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow">
+            <h3 class="text-gray-500">Lessons</h3>
+            <div class="text-4xl font-bold">
+                ${data.total_lessons}
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow">
+            <h3 class="text-gray-500">Quiz Attempts</h3>
+            <div class="text-4xl font-bold">
+                ${data.quiz_attempts}
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow">
+            <h3 class="text-gray-500">Average Score</h3>
+            <div class="text-4xl font-bold">
+                ${data.average_score}%
+            </div>
+        </div>
+    `;
+}
+
 async function init() {
   // Date
   document.getElementById('topbarDate').textContent = new Date().toLocaleDateString('en-IN', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) + ' · Teacher Portal';
@@ -368,7 +454,25 @@ async function init() {
     subjects = subjectsRes.subjects;
     const subjectSelect = document.getElementById('f-subject');
     subjectSelect.innerHTML = subjects.map(s => `<option value="${s.id}">${s.icon} ${s.name}</option>`).join('');
+
+    // Load chapters for the selected subject (required for lesson publish)
+    subjectSelect.addEventListener('change', async () => {
+      const sid = subjectSelect.value;
+      const chapterRes = await api(`/api/subjects/${sid}/chapters`);
+      const chapterSelect = document.getElementById('chapterId');
+      if (chapterRes.success) {
+        chapterSelect.innerHTML = chapterRes.chapters.length
+          ? chapterRes.chapters.map(ch => `<option value="${ch.id}">${ch.title}</option>`).join('')
+          : '<option value="">No chapters</option>';
+      }
+    });
+
+    // Initial chapter load
+    if (subjects.length) {
+      subjectSelect.dispatchEvent(new Event('change'));
+    }
   }
+
 
   // Lessons
   if (lessonsRes.success) {
@@ -379,6 +483,9 @@ async function init() {
 
   // Chart
   if (chartRes.success) renderChart(chartRes.data);
+
+  // Analytics cards
+  await loadAnalytics();
 }
 
 function renderStudents() {
@@ -491,18 +598,33 @@ function selectAns(btn, val) {
 
 async function submitLesson() {
   const subject_id = document.getElementById('f-subject').value;
+  const chapterId  = document.getElementById('chapterId').value;
   const title      = document.getElementById('f-title').value.trim();
   const content    = document.getElementById('f-content').value.trim();
+  const imageUrl   = document.getElementById('f-imageUrl').value.trim();
+  const videoUrl   = document.getElementById('f-videoUrl').value.trim();
   const xp_reward  = document.getElementById('f-xp').value;
   const order_num  = document.getElementById('f-order').value;
-  if (!title || !content) { showToast('⚠️ Title and content are required!'); return; }
+  if (!title || !content || !chapterId) { showToast('⚠️ Title, content and chapter are required!'); return; }
+
   const btn = document.getElementById('lessonBtn');
   btn.disabled = true; btn.textContent = '⏳ Publishing...';
-  try {
+try {
     const res  = await fetch('/api/teacher/lessons', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({subject_id, title, content, xp_reward: parseInt(xp_reward), order_num: parseInt(order_num)})
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+body: JSON.stringify({
+        subject_id,
+        chapter_id: chapterId,
+        title,
+        content,
+        image_url: imageUrl,
+        video_url: videoUrl,
+        xp_reward: parseInt(xp_reward),
+        order_num: parseInt(order_num)
+      })
     });
+
     const data = await res.json();
     if (data.success) {
       showToast('✅ ' + data.message);
@@ -562,7 +684,38 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3200);
 }
 
+async function loadTopStudents(){
+
+    const res = await fetch('/api/teacher/top-students');
+    const data = await res.json();
+
+    let html = '';
+
+    data.students.forEach((student,index)=>{
+
+        html += `
+        <div
+            class="flex justify-between border-b py-3">
+
+            <div>
+                ${index+1}. ${student.username}
+            </div>
+
+            <div>
+                ${student.xp} XP
+            </div>
+
+        </div>
+        `;
+    });
+
+    const el = document.getElementById('topStudents');
+    if (el) el.innerHTML = html;
+}
+
 init();
+loadTopStudents();
 </script>
 </body>
 </html>
+

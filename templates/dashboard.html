@@ -166,6 +166,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 .loading{display:flex;align-items:center;justify-content:center;padding:2rem;color:var(--muted2);}
 ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="bg-mesh"></div>
@@ -214,6 +215,17 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
     <div class="topbar">
       <h1>Welcome back, <span id="heroName">...</span>! 👋</h1>
       <div style="display:flex;align-items:center;gap:1rem;">
+        <a href="/certificate"
+          target="_blank"
+          style="
+          background:linear-gradient(135deg,#10b981,#059669);
+          color:white;
+          padding:10px 18px;
+          border-radius:10px;
+          text-decoration:none;
+          font-weight:700;">
+          📜 Certificate
+        </a>
         <div class="streak-pill">🔥 <span id="streakCount">0</span>-Day Streak!</div>
       </div>
     </div>
@@ -254,6 +266,13 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
     </div>
 
     <!-- CONTENT GRID -->
+    <div class="card-box">
+      <div class="section-header">
+        <div class="section-title">📈 Learning Progress</div>
+      </div>
+
+      <canvas id="progressChart" height="100"></canvas>
+    </div>
     <div class="content-grid">
       <div style="display:flex;flex-direction:column;gap:1rem;">
         <!-- Subjects -->
@@ -595,8 +614,28 @@ function showToast(msg) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
+function loadProgressChart() {
 
+    const ctx = document.getElementById('progressChart');
+
+    if (!ctx) return;
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'XP Earned',
+                data: [40, 80, 120, 160, 220, 280, 340],
+                borderWidth: 3,
+                tension: 0.4
+            }]
+        }
+    });
+
+}
 init();
+loadProgressChart();
 </script>
 </body>
 </html>

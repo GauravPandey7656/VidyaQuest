@@ -10,12 +10,13 @@ from flask import (
     Flask, request, jsonify, render_template,
     redirect, url_for, session, make_response
 )
+
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3, os, datetime, functools
 
 app = Flask(__name__)
 app.secret_key = "vidyaquest-super-secret-2024"
-DB_PATH = os.path.join(os.path.dirname(__file__), "vidyaquest.db")
+DB_PATH = os.path.join(os.path.dirname(__file__), "database", "vidyaquest.db")
 
 # ─────────────────────────────────────────────────────
 #  DATABASE HELPERS
@@ -48,7 +49,9 @@ def init_db():
     conn = get_db()
     c    = conn.cursor()
 
+    # 1) Create tables first (important: migrations below rely on table existence)
     c.executescript("""
+
     CREATE TABLE IF NOT EXISTS users (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
         name        TEXT    NOT NULL,
@@ -65,22 +68,38 @@ def init_db():
     );
 
     CREATE TABLE IF NOT EXISTS subjects (
+
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
         name        TEXT    NOT NULL,
         icon        TEXT    DEFAULT '📚',
         description TEXT    DEFAULT ''
     );
 
+    CREATE TABLE IF NOT EXISTS chapters (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        subject_id  INTEGER NOT NULL REFERENCES subjects(id),
+        title       TEXT NOT NULL,
+        description TEXT DEFAULT '',
+        order_num   INTEGER DEFAULT 1
+    );
+
     CREATE TABLE IF NOT EXISTS lessons (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
         subject_id  INTEGER NOT NULL REFERENCES subjects(id),
-        title       TEXT    NOT NULL,
-        content     TEXT    DEFAULT '',
+        chapter_id  INTEGER REFERENCES chapters(id),
+
+        title       TEXT NOT NULL,
+        content     TEXT DEFAULT '',
+        video_url   TEXT DEFAULT '',
+        image_url   TEXT DEFAULT '',
         xp_reward   INTEGER DEFAULT 20,
         order_num   INTEGER DEFAULT 1,
+
         created_by  INTEGER REFERENCES users(id),
-        created_at  TEXT    DEFAULT (datetime('now'))
+        created_at  TEXT DEFAULT (datetime('now'))
     );
+
+
 
     CREATE TABLE IF NOT EXISTS quizzes (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -134,6 +153,25 @@ def init_db():
         ]
     )
 
+    # ── Seed chapters ──
+    c.executemany(
+        "INSERT OR IGNORE INTO chapters (id,subject_id,title,description,order_num) VALUES (?,?,?,?,?)",
+        [
+            (1,1,"Fractions","Understanding fractions",1),
+            (2,1,"Decimals","Working with decimals",2),
+            (3,1,"Algebra","Introduction to algebra",3),
+
+            (4,2,"Plants","Plant biology",1),
+            (5,2,"Human Body","Human body systems",2),
+
+            (6,3,"Grammar","English grammar basics",1),
+
+            (7,4,"Indian History","History lessons",1),
+
+            (8,5,"हिंदी व्याकरण","Hindi grammar",1),
+        ]
+    )
+
     # ── Seed badges ──
     c.executemany(
         "INSERT OR IGNORE INTO badges (id,name,description,icon,xp_required,lessons_required,streak_required) VALUES (?,?,?,?,?,?,?)",
@@ -149,31 +187,76 @@ def init_db():
 
     # ── Seed sample lessons ──
     c.executemany(
-        "INSERT OR IGNORE INTO lessons (id,subject_id,title,content,xp_reward,order_num) VALUES (?,?,?,?,?,?)",
+        "INSERT OR IGNORE INTO lessons (id,subject_id,chapter_id,title,content,video_url,image_url,xp_reward,order_num) VALUES (?,?,?,?,?,?,?,?,?)",
         [
-            (1,1,"Introduction to Fractions",
-             "A fraction represents a part of a whole. The top number is called the numerator and the bottom number is the denominator. For example, 3/4 means 3 parts out of 4 equal parts.",
-             30,1),
-            (2,1,"Adding Fractions",
-             "To add fractions with the same denominator, simply add the numerators. Example: 1/4 + 2/4 = 3/4. For different denominators, first find the LCM.",
-             30,2),
-            (3,2,"Photosynthesis",
-             "Photosynthesis is the process by which green plants make their own food using sunlight, water, and carbon dioxide. It happens in the chloroplasts of plant cells.",
-             25,1),
-            (4,2,"The Human Digestive System",
-             "Digestion begins in the mouth and ends in the large intestine. Key organs include the stomach, small intestine, liver, and pancreas.",
-             25,2),
-            (5,3,"Parts of Speech",
-             "The 8 parts of speech are: Noun, Pronoun, Verb, Adjective, Adverb, Preposition, Conjunction, and Interjection. Understanding these helps in constructing correct sentences.",
-             20,1),
-            (6,4,"Panchayati Raj System",
-             "Panchayati Raj is India's system of rural self-governance. It has three tiers: Gram Panchayat (village), Panchayat Samiti (block), and Zila Parishad (district).",
-             20,1),
-            (7,5,"संज्ञा (Nouns in Hindi)",
-             "संज्ञा वह शब्द है जो किसी व्यक्ति, वस्तु, स्थान या भाव का बोध कराती है। जैसे: राम, पुस्तक, दिल्ली, प्रेम।",
-             20,1),
+            (
+                1,1,1,
+                "Introduction to Fractions",
+                "A fraction represents a part of a whole. For example 1/2 means one part out of two equal parts.",
+                "https://www.youtube.com/embed/p33BYf1NDAE",
+                "https://images.unsplash.com/photo-1509228468518-180dd4864904",
+                30,
+                1
+            ),
+
+            (
+                2,1,1,
+                "Adding Fractions",
+                "To add fractions with same denominator, add the numerators and keep the denominator the same.",
+                "https://www.youtube.com/embed/4vN8iN9j4mM",
+                "https://images.unsplash.com/photo-1635372722656-389f87a941b7",
+                30,
+                2
+            ),
+
+            (
+                3,2,4,
+                "Photosynthesis",
+                "Photosynthesis is the process...",
+                "",
+                "",
+                25,1
+            ),
+
+            (
+                4,2,5,
+                "The Human Digestive System",
+                "Digestion begins in the mouth...",
+                "",
+                "",
+                25,2
+            ),
+
+            (
+                5,3,6,
+                "Parts of Speech",
+                "The 8 parts of speech are...",
+                "",
+                "",
+                20,1
+            ),
+
+            (
+                6,4,7,
+                "Panchayati Raj System",
+                "Panchayati Raj is India's system...",
+                "",
+                "",
+                20,1
+            ),
+
+            (
+                7,5,8,
+                "संज्ञा",
+                "संज्ञा वह शब्द है...",
+                "",
+                "",
+                20,1
+            )
         ]
     )
+
+
 
     # ── Seed sample quiz questions ──
     c.executemany(
@@ -288,9 +371,83 @@ def index():
         return redirect(url_for("student_dashboard"))
     return render_template("index.html")
 
+@app.route("/explorer")
+@login_required()
+def explorer():
+    return render_template("explorer.html")
+
+@app.route("/subject/<int:sid>")
+@login_required()
+def subject_page(sid):
+
+
+    return render_template(
+        "subject.html",
+        subject_id=sid
+    )
+
+
+@app.route("/chapter/<int:cid>")
+@login_required()
+def chapter_page(cid):
+
+    return render_template(
+        "chapter.html",
+        chapter_id=cid
+    )
+
+
+@app.route("/lesson/<int:lid>")
+@login_required()
+def lesson_page(lid):
+
+    return render_template(
+        "lesson.html",
+        lesson_id=lid
+    )
+
+
+@app.route("/lesson/<int:lid>/quiz")
+@login_required()
+def lesson_quiz_page(lid):
+
+    return render_template(
+        "lesson_quiz.html",
+        lesson_id=lid
+    )
+
+
+@app.route("/quiz-result")
+@login_required()
+def quiz_result():
+    return render_template("quiz_result.html")
+
+
+
+    
+
+
+
+
+
+
+
+
+@app.route("/quiz/<int:qid>")
+@login_required()
+def quiz_page(qid):
+
+    return render_template(
+        "quiz.html",
+        quiz_id=qid
+    )
+
+
+
 @app.route("/dashboard")
 @login_required()
 def student_dashboard():
+
     if session.get("user_role") == "teacher":
         return redirect(url_for("teacher_dashboard"))
     return render_template("dashboard.html")
@@ -304,6 +461,22 @@ def teacher_dashboard():
 def logout():
     session.clear()
     return redirect(url_for("index"))
+@app.route("/certificate")
+@login_required()
+def certificate():
+
+
+    user = query(
+        "SELECT name FROM users WHERE id=?",
+        (session["user_id"],),
+        one=True
+    )
+
+    return render_template(
+        "certificate.html",
+        name=user["name"],
+        date=datetime.date.today().strftime("%d %B %Y")
+    )
 
 
 # ─────────────────────────────────────────────────────
@@ -441,6 +614,166 @@ def api_subjects():
     return jsonify(success=True, subjects=result)
 
 
+@app.route("/api/subjects/<int:sid>/chapters")
+def api_chapters(sid):
+
+    if "user_id" not in session:
+        return jsonify(success=False), 401
+
+    rows = query("""
+        SELECT *
+        FROM chapters
+        WHERE subject_id=?
+        ORDER BY order_num
+    """, (sid,))
+
+    return jsonify(
+        success=True,
+        chapters=[dict(r) for r in rows]
+    )
+
+
+@app.route("/api/chapters/<int:cid>/lessons")
+def api_chapter_lessons(cid):
+
+
+    if "user_id" not in session:
+        return jsonify(success=False), 401
+
+
+    uid = session["user_id"]
+
+    rows = query("""
+        SELECT
+            l.*,
+            COALESCE(up.completed,0) as completed,
+            COALESCE(up.score,0) as score,
+            COALESCE(up.xp_earned,0) as xp_earned
+
+        FROM lessons l
+
+        LEFT JOIN user_progress up
+            ON l.id=up.lesson_id
+           AND up.user_id=?
+
+        WHERE l.chapter_id=?
+
+        ORDER BY l.order_num
+    """, (uid, cid))
+
+    return jsonify(
+        success=True,
+        lessons=[dict(r) for r in rows]
+    )
+
+
+@app.route("/api/chapters/<int:cid>/progress")
+def api_chapter_progress(cid):
+
+    if "user_id" not in session:
+        return jsonify(success=False), 401
+
+    uid = session["user_id"]
+
+    row = query("""
+        SELECT
+            COUNT(l.id) as total_lessons,
+
+            SUM(
+                CASE
+                    WHEN up.completed=1 THEN 1
+                    ELSE 0
+                END
+            ) as completed_lessons
+
+        FROM lessons l
+
+        LEFT JOIN user_progress up
+            ON l.id=up.lesson_id
+           AND up.user_id=?
+
+        WHERE l.chapter_id=?
+    """, (uid, cid), one=True)
+
+    total = row["total_lessons"] or 0
+    completed = row["completed_lessons"] or 0
+
+    percent = 0
+
+    if total > 0:
+        percent = round((completed / total) * 100)
+
+    return jsonify(
+        success=True,
+        total_lessons=total,
+        completed_lessons=completed,
+        percent=percent
+    )
+
+
+@app.route("/api/subjects/<int:sid>/path")
+def api_learning_path(sid):
+    if "user_id" not in session:
+        return jsonify(success=False), 401
+
+    uid = session["user_id"]
+
+    chapters = query("""
+        SELECT *
+        FROM chapters
+        WHERE subject_id=?
+        ORDER BY order_num
+    """, (sid,))
+
+    result = []
+
+    previous_complete = True
+
+    for ch in chapters:
+        progress = query("""
+            SELECT
+                COUNT(l.id) as total_lessons,
+
+                SUM(
+                    CASE
+                        WHEN up.completed=1 THEN 1
+                        ELSE 0
+                    END
+                ) as completed_lessons
+
+            FROM lessons l
+
+            LEFT JOIN user_progress up
+                ON l.id=up.lesson_id
+               AND up.user_id=?
+
+            WHERE l.chapter_id=?
+        """, (uid, ch["id"]), one=True)
+
+        total = progress["total_lessons"] or 0
+        completed = progress["completed_lessons"] or 0
+
+        percent = 0
+        if total > 0:
+            percent = round((completed / total) * 100)
+
+        unlocked = previous_complete
+
+        result.append({
+            "id": ch["id"],
+            "title": ch["title"],
+            "percent": percent,
+            "unlocked": unlocked
+        })
+
+        previous_complete = (percent == 100)
+
+    return jsonify(
+        success=True,
+        chapters=result
+    )
+
+
 @app.route("/api/subjects/<int:sid>/lessons")
 def api_lessons(sid):
     if "user_id" not in session:
@@ -455,6 +788,7 @@ def api_lessons(sid):
         WHERE l.subject_id=? ORDER BY l.order_num
     """, (uid, sid))
     return jsonify(success=True, lessons=[dict(r) for r in rows])
+
 
 
 @app.route("/api/lessons/<int:lid>/quiz")
@@ -473,7 +807,64 @@ def api_quiz(lid):
     return jsonify(success=True, questions=qs, lesson=dict(lesson) if lesson else {})
 
 
+
+@app.route("/api/lesson/<int:lid>")
+def api_lesson(lid):
+
+    row = query("""
+        SELECT *
+        FROM lessons
+        WHERE id=?
+    """, (lid,), one=True)
+
+    if not row:
+        return jsonify(success=False, message="Lesson not found"), 404
+
+    return jsonify(
+        success=True,
+        lesson=dict(row)
+    )
+
+
+@app.route("/api/lesson/<int:lid>/complete",
+           methods=["POST"])
+@login_required()
+def complete_lesson(lid):
+
+    uid = session["user_id"]
+
+    lesson = query("""
+        SELECT *
+        FROM lessons
+        WHERE id=?
+    """, (lid,), one=True)
+
+    if not lesson:
+        return jsonify(success=False, message="Lesson not found"), 404
+
+    xp = lesson["xp_reward"]
+
+    mutate("""
+        INSERT OR REPLACE INTO user_progress
+        (user_id,lesson_id,completed,score,xp_earned)
+        VALUES (?,?,?,?,?)
+    """, (uid,lid,1,100,xp))
+
+    mutate("""
+        UPDATE users
+        SET xp = xp + ?
+        WHERE id=?
+    """, (xp,uid))
+
+
+    return jsonify(
+        success=True,
+        xp=xp
+    )
+
+
 @app.route("/api/lessons/<int:lid>/submit", methods=["POST"])
+
 def api_submit(lid):
     if "user_id" not in session:
         return jsonify(success=False), 401
@@ -570,6 +961,60 @@ def api_activity():
 # ─────────────────────────────────────────────────────
 #  TEACHER API
 # ─────────────────────────────────────────────────────
+@app.route("/api/teacher/analytics")
+@login_required(role="teacher")
+def teacher_analytics():
+    total_students = query("""
+        SELECT COUNT(*) AS total
+        FROM users
+        WHERE role='student'
+    """, one=True)["total"]
+
+    total_lessons = query("""
+        SELECT COUNT(*) AS total
+        FROM lessons
+    """, one=True)["total"]
+
+    quiz_attempts = query("""
+        SELECT COUNT(*) AS total
+        FROM user_progress
+    """, one=True)["total"]
+
+    avg_score = query("""
+        SELECT ROUND(AVG(score),2) AS avg_score
+        FROM user_progress
+        WHERE score > 0
+    """, one=True)["avg_score"]
+
+    return jsonify(
+        success=True,
+        total_students=total_students,
+        total_lessons=total_lessons,
+        quiz_attempts=quiz_attempts,
+        average_score=avg_score or 0
+    )
+
+
+@app.route("/api/teacher/top-students")
+@login_required(role="teacher")
+def teacher_top_students():
+    rows = query("""
+        SELECT
+            name AS username,
+            xp,
+            level
+        FROM users
+        WHERE role='student'
+        ORDER BY xp DESC
+        LIMIT 5
+    """)
+
+    return jsonify(
+        success=True,
+        students=[dict(r) for r in rows]
+    )
+
+
 @app.route("/api/teacher/stats")
 @login_required(role="teacher")
 def api_teacher_stats():
@@ -637,18 +1082,24 @@ def api_add_lesson():
     uid = session["user_id"]
     d   = request.json or {}
     subject_id = d.get("subject_id")
+    chapter_id = d.get("chapter_id")
     title      = d.get("title","").strip()
     content    = d.get("content","").strip()
     xp_reward  = int(d.get("xp_reward", 20))
     order_num  = int(d.get("order_num", 1))
 
-    if not title or not content or not subject_id:
-        return jsonify(success=False, message="Subject, title and content are required"), 400
+    image_url  = d.get("image_url", "").strip()
+    video_url  = d.get("video_url", "").strip()
+
+    if not title or not content or not subject_id or not chapter_id:
+        return jsonify(success=False, message="Subject, chapter, title and content are required"), 400
 
     lid = mutate(
-        "INSERT INTO lessons (subject_id,title,content,xp_reward,order_num,created_by) VALUES (?,?,?,?,?,?)",
-        (subject_id, title, content, xp_reward, order_num, uid)
+        "INSERT INTO lessons (subject_id,chapter_id,title,content,video_url,image_url,xp_reward,order_num,created_by) VALUES (?,?,?,?,?,?,?,?,?)",
+        (subject_id, chapter_id, title, content, video_url, image_url, xp_reward, order_num, uid)
     )
+
+
     return jsonify(success=True, message="Lesson published! ✅", lesson_id=lid), 201
 
 

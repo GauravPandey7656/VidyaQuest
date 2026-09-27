@@ -1,279 +1,415 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>VidyaQuest – Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
-<style>
-:root{--sky:#0f172a;--gold:#f59e0b;--green:#22c55e;--orange:#fb923c;--pink:#f472b6;--blue:#38bdf8;--card:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.10);--text:#f1f5f9;--muted:#94a3b8;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 20% 50%,#0c2340,transparent 60%),radial-gradient(ellipse at 80% 20%,#1a0c30,transparent 55%),radial-gradient(ellipse at 60% 80%,#0d2a1a,transparent 50%),#0f172a;}
-.stars{position:fixed;inset:0;z-index:0;background-image:radial-gradient(1px 1px at 10% 15%,rgba(255,255,255,0.7),transparent),radial-gradient(1px 1px at 25% 40%,rgba(255,255,255,0.5),transparent),radial-gradient(1.5px 1.5px at 50% 10%,rgba(255,255,255,0.8),transparent),radial-gradient(1px 1px at 70% 35%,rgba(255,255,255,0.4),transparent),radial-gradient(1px 1px at 85% 60%,rgba(255,255,255,0.6),transparent),radial-gradient(1px 1px at 90% 80%,rgba(255,255,255,0.7),transparent),radial-gradient(1px 1px at 30% 25%,rgba(255,255,255,0.5),transparent);animation:twinkle 4s ease-in-out infinite alternate;}
-@keyframes twinkle{0%{opacity:0.7;}100%{opacity:1;}}
-.orb{position:fixed;border-radius:50%;animation:floatOrb linear infinite;opacity:0;z-index:0;filter:blur(1px);}
-@keyframes floatOrb{0%{transform:translateY(100vh) scale(0);opacity:0;}10%{opacity:0.8;}90%{opacity:0.6;}100%{transform:translateY(-10vh) scale(1.2);opacity:0;}}
-.container{position:relative;z-index:10;width:100%;max-width:460px;padding:1rem;animation:slideUp 0.7s cubic-bezier(.22,1,.36,1) both;}
-@keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
-.brand{text-align:center;margin-bottom:1.5rem;}
-.brand-icon{font-size:3rem;line-height:1;animation:bounce 2s ease-in-out infinite;}
-@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
-.brand h1{font-family:'Baloo 2',cursive;font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--orange),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.brand p{color:var(--muted);font-size:0.85rem;margin-top:0.3rem;}
-.tabs{display:flex;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:4px;margin-bottom:1.5rem;backdrop-filter:blur(12px);}
-.tab-btn{flex:1;padding:0.6rem;border:none;background:transparent;color:var(--muted);font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:700;border-radius:10px;cursor:pointer;transition:all 0.25s;}
-.tab-btn.active{background:linear-gradient(135deg,var(--gold),var(--orange));color:#0f172a;box-shadow:0 4px 15px rgba(245,158,11,0.4);}
-.card{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:20px;padding:2rem;backdrop-filter:blur(20px);box-shadow:0 25px 60px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.08);}
-.form-panel{display:none;}
-.form-panel.active{display:block;animation:fadeIn 0.3s ease;}
-@keyframes fadeIn{from{opacity:0;transform:translateX(10px);}to{opacity:1;transform:translateX(0);}}
-.role-select{display:flex;gap:0.6rem;margin-bottom:1.2rem;}
-.role-btn{flex:1;padding:0.6rem 0.4rem;border:1.5px solid var(--border);border-radius:12px;background:transparent;color:var(--muted);font-family:'Nunito',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:0.4rem;}
-.role-btn.selected{border-color:var(--green);background:rgba(34,197,94,0.12);color:var(--green);box-shadow:0 0 12px rgba(34,197,94,0.25);}
-.input-group{margin-bottom:1rem;}
-.input-group label{display:block;font-size:0.8rem;font-weight:700;color:var(--muted);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em;}
-.input-wrap{position:relative;}
-.input-wrap .icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none;}
-.input-group input,.input-group select{width:100%;padding:0.75rem 1rem 0.75rem 2.6rem;background:rgba(255,255,255,0.06);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'Nunito',sans-serif;font-size:0.95rem;transition:border-color 0.2s,box-shadow 0.2s;outline:none;appearance:none;}
-.input-group input:focus,.input-group select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,158,11,0.2);background:rgba(255,255,255,0.08);}
-.input-group select option{background:#1e293b;}
-.strength-bar{display:flex;gap:3px;margin-top:6px;}
-.strength-bar span{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s;}
-.btn-submit{width:100%;padding:0.9rem;border:none;border-radius:14px;background:linear-gradient(135deg,var(--gold) 0%,var(--orange) 100%);color:#0f172a;font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 6px 20px rgba(245,158,11,0.4);margin-top:0.5rem;position:relative;overflow:hidden;}
-.btn-submit:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(245,158,11,0.5);}
-.btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
-.error-msg{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:0.6rem 0.8rem;border-radius:10px;font-size:0.82rem;margin-bottom:0.8rem;display:none;}
-.error-msg.show{display:block;}
-.divider{text-align:center;margin:1rem 0;color:var(--muted);font-size:0.8rem;position:relative;}
-.divider::before,.divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
-.divider::before{left:0;}.divider::after{right:0;}
-.stats-bar{display:flex;justify-content:center;gap:2rem;margin-top:1.5rem;text-align:center;}
-.stat{color:var(--muted);font-size:0.78rem;}
-.stat strong{display:block;font-family:'Baloo 2',cursive;font-size:1.1rem;color:var(--gold);}
-.forgot{text-align:right;margin-top:0.3rem;}
-.forgot a{color:var(--blue);font-size:0.8rem;text-decoration:none;font-weight:600;}
-.terms{font-size:0.75rem;color:var(--muted);text-align:center;margin-top:0.8rem;}
-.terms a{color:var(--gold);text-decoration:none;}
-.hint-box{background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.2);border-radius:10px;padding:0.6rem 0.8rem;font-size:0.75rem;color:var(--blue);margin-bottom:1rem;}
-</style>
-</head>
-<body>
-<div class="bg"></div>
-<div class="stars"></div>
-<div id="orbs"></div>
+{% extends "base.html" %}
 
-<div class="container">
-  <div class="brand">
-    <div class="brand-icon">🏫</div>
-    <h1>VidyaQuest</h1>
-    <p>Gamified Learning for Rural India 🌾</p>
-  </div>
+{% block title %}VidyaQuest | Gamified Learning{% endblock %}
 
-  <!-- Demo hint -->
-  <div class="hint-box">
-    💡 <strong>Demo:</strong> student@demo.com / demo123 &nbsp;|&nbsp; teacher@demo.com / teacher123
-  </div>
+{% block content %}
 
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('login')">🔓 Login</button>
-    <button class="tab-btn" onclick="switchTab('register')">✨ Register</button>
-  </div>
+<!-- NAVBAR -->
+<nav class="bg-white shadow-md fixed w-full top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
-  <div class="card">
-    <!-- ERROR -->
-    <div class="error-msg" id="errorMsg"></div>
+        <h1 class="text-3xl font-bold text-indigo-600">
+            🎓 VidyaQuest
+        </h1>
 
-    <!-- LOGIN -->
-    <div class="form-panel active" id="login-panel">
-      <div class="role-select" id="login-roles">
-        <button class="role-btn selected" onclick="selectRole(this)">🎓 Student</button>
-        <button class="role-btn" onclick="selectRole(this)">📚 Teacher</button>
-      </div>
-      <div class="input-group">
-        <label>Email</label>
-        <div class="input-wrap"><span class="icon">📧</span>
-          <input type="email" id="login-email" placeholder="your@email.com"/>
+        <div class="space-x-8 hidden md:flex">
+            <a href="#features" class="hover:text-indigo-600">Features</a>
+            <a href="#stats" class="hover:text-indigo-600">Stats</a>
+            <a href="#contact" class="hover:text-indigo-600">Contact</a>
         </div>
-      </div>
-      <div class="input-group">
-        <label>Password</label>
-        <div class="input-wrap"><span class="icon">🔑</span>
-          <input type="password" id="login-pass" placeholder="Enter your password" onkeydown="if(event.key==='Enter')handleLogin()"/>
+
+        <button
+            onclick="openLogin()"
+            class="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition">
+            Login
+        </button>
+
+    </div>
+</nav>
+
+<!-- HERO -->
+<section
+class="min-h-screen bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 flex items-center">
+
+<div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+
+<div data-aos="fade-right">
+
+<h1 class="text-6xl font-extrabold text-white leading-tight mb-6">
+Learn.<br>
+Play.<br>
+Grow.
+</h1>
+
+<p class="text-xl text-white mb-8">
+Gamified education platform designed for rural students.
+Earn XP, unlock badges, complete quizzes and become a learning champion.
+</p>
+
+<button
+class="bg-white text-indigo-700 px-8 py-4 rounded-xl font-semibold text-lg hover:scale-105 transition">
+Get Started
+</button>
+
+</div>
+
+<div
+data-aos="fade-left"
+class="flex justify-center">
+
+<div
+class="bg-white/20 backdrop-blur-lg rounded-3xl p-10 shadow-2xl">
+
+<div class="text-center text-white">
+
+<div class="text-7xl mb-4">
+🏆
+</div>
+
+<h3 class="text-3xl font-bold">
+Level Up Learning
+</h3>
+
+<p class="mt-3">
+XP • Badges • Quizzes • Rewards
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- FEATURES -->
+
+<section id="features" class="py-24 bg-gray-100">
+
+<div class="max-w-7xl mx-auto px-6">
+
+<h2
+class="text-5xl font-bold text-center mb-16">
+Why VidyaQuest?
+</h2>
+
+<div class="grid md:grid-cols-4 gap-8">
+
+<div
+class="bg-white rounded-2xl shadow-lg p-8 hover:-translate-y-2 transition">
+
+<div class="text-5xl mb-4">🏆</div>
+
+<h3 class="font-bold text-2xl mb-3">
+Earn XP
+</h3>
+
+<p>
+Complete lessons and gain experience points.
+</p>
+
+</div>
+
+<div
+class="bg-white rounded-2xl shadow-lg p-8 hover:-translate-y-2 transition">
+
+<div class="text-5xl mb-4">🎖️</div>
+
+<h3 class="font-bold text-2xl mb-3">
+Badges
+</h3>
+
+<p>
+Unlock achievements and showcase progress.
+</p>
+
+</div>
+
+<div
+class="bg-white rounded-2xl shadow-lg p-8 hover:-translate-y-2 transition">
+
+<div class="text-5xl mb-4">📈</div>
+
+<h3 class="font-bold text-2xl mb-3">
+Track Progress
+</h3>
+
+<p>
+Visual dashboards and performance reports.
+</p>
+
+</div>
+
+<div
+class="bg-white rounded-2xl shadow-lg p-8 hover:-translate-y-2 transition">
+
+<div class="text-5xl mb-4">👨‍🏫</div>
+
+<h3 class="font-bold text-2xl mb-3">
+Teacher Analytics
+</h3>
+
+<p>
+Monitor students and improve outcomes.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- STATS -->
+
+<section id="stats" class="py-20 bg-indigo-700">
+
+<div class="max-w-6xl mx-auto px-6">
+
+<div class="grid md:grid-cols-4 gap-8 text-center text-white">
+
+<div>
+<h2 class="text-5xl font-bold">500+</h2>
+<p class="mt-3">Students</p>
+</div>
+
+<div>
+<h2 class="text-5xl font-bold">120+</h2>
+<p class="mt-3">Lessons</p>
+</div>
+
+<div>
+<h2 class="text-5xl font-bold">1000+</h2>
+<p class="mt-3">Quizzes</p>
+</div>
+
+<div>
+<h2 class="text-5xl font-bold">25+</h2>
+<p class="mt-3">Teachers</p>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- FOOTER -->
+
+<footer
+id="contact"
+class="bg-gray-900 text-white py-10">
+
+<div class="max-w-7xl mx-auto px-6 text-center">
+
+<h2 class="text-3xl font-bold mb-3">
+VidyaQuest
+</h2>
+
+<p>
+Making learning engaging through gamification.
+</p>
+
+<p class="mt-6 text-gray-400">
+© 2026 VidyaQuest
+</p>
+
+</div>
+
+</footer>
+
+<!-- LOGIN MODAL -->
+
+<div id="loginModal"
+     class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md">
+
+        <h2 class="text-3xl font-bold mb-6 text-center">
+            Login
+        </h2>
+
+        <input
+            id="email"
+            type="email"
+            placeholder="Email"
+            class="w-full border p-3 rounded-lg mb-4">
+
+        <input
+            id="password"
+            type="password"
+            placeholder="Password"
+            class="w-full border p-3 rounded-lg mb-4">
+
+        <button
+            onclick="loginUser()"
+            class="w-full bg-indigo-600 text-white p-3 rounded-lg">
+            Login
+        </button>
+
+        <button
+            onclick="closeLogin()"
+            class="w-full mt-3 border p-3 rounded-lg">
+            Cancel
+        </button>
+
+        <div class="mt-4 text-center">
+
+            <button
+                onclick="openRegister()"
+                class="text-indigo-600 font-semibold">
+                Create New Account
+            </button>
+
+            <div class="mt-3 text-sm text-gray-500">
+                Demo Student:
+                student@demo.com / demo123
+            </div>
+
         </div>
-        <div class="forgot"><a href="#">Forgot password?</a></div>
-      </div>
-      <button class="btn-submit" id="loginBtn" onclick="handleLogin()">⚡ Start Quest!</button>
-      <div class="divider">or</div>
-      <p style="text-align:center;color:var(--muted);font-size:0.85rem;">New here? <a href="#" onclick="switchTab('register')" style="color:var(--gold);font-weight:700;text-decoration:none;">Create Account →</a></p>
+
     </div>
 
-    <!-- REGISTER -->
-    <div class="form-panel" id="register-panel">
-      <div class="role-select" id="register-roles">
-        <button class="role-btn selected" onclick="selectRole(this)">🎓 Student</button>
-        <button class="role-btn" onclick="selectRole(this)">📚 Teacher</button>
-      </div>
-      <div class="input-group">
-        <label>Full Name</label>
-        <div class="input-wrap"><span class="icon">🙋</span>
-          <input type="text" id="reg-name" placeholder="Your full name"/>
-        </div>
-      </div>
-      <div class="input-group">
-        <label>Email</label>
-        <div class="input-wrap"><span class="icon">📧</span>
-          <input type="email" id="reg-email" placeholder="you@email.com"/>
-        </div>
-      </div>
-      <div class="input-group">
-        <label>Village / District</label>
-        <div class="input-wrap"><span class="icon">🌾</span>
-          <input type="text" id="reg-village" placeholder="Your village or district"/>
-        </div>
-      </div>
-      <div class="input-group">
-        <label>Class / Grade</label>
-        <div class="input-wrap"><span class="icon">🏅</span>
-          <select id="reg-grade">
-            <option value="">Select grade</option>
-            <option>Class 6</option><option>Class 7</option><option>Class 8</option>
-            <option>Class 9</option><option>Class 10</option><option>Class 11</option><option>Class 12</option>
-            <option>Teacher / Mentor</option>
-          </select>
-        </div>
-      </div>
-      <div class="input-group">
-        <label>Password</label>
-        <div class="input-wrap"><span class="icon">🔒</span>
-          <input type="password" id="reg-pass" placeholder="Create a strong password" oninput="checkStrength(this.value)"/>
-        </div>
-        <div class="strength-bar">
-          <span id="s1"></span><span id="s2"></span><span id="s3"></span><span id="s4"></span>
-        </div>
-      </div>
-      <button class="btn-submit" id="regBtn" onclick="handleRegister()">🚀 Join the Quest!</button>
-      <p class="terms">By registering you agree to our <a href="#">Terms</a> & <a href="#">Privacy Policy</a></p>
-    </div>
-  </div>
+</div>
 
-  <div class="stats-bar">
-    <div class="stat"><strong>12,400+</strong>Students</div>
-    <div class="stat"><strong>340+</strong>Villages</div>
-    <div class="stat"><strong>98%</strong>Pass Rate</div>
-  </div>
+<div id="registerModal"
+     class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md">
+
+        <h2 class="text-3xl font-bold mb-6 text-center">
+            Register
+        </h2>
+
+        <input
+            id="regName"
+            type="text"
+            placeholder="Full Name"
+            class="w-full border p-3 rounded-lg mb-4">
+
+        <input
+            id="regEmail"
+            type="email"
+            placeholder="Email"
+            class="w-full border p-3 rounded-lg mb-4">
+
+        <input
+            id="regPassword"
+            type="password"
+            placeholder="Password"
+            class="w-full border p-3 rounded-lg mb-4">
+
+        <button
+            onclick="registerUser()"
+            class="w-full bg-green-600 text-white p-3 rounded-lg">
+            Register
+        </button>
+
+        <button
+            onclick="closeRegister()"
+            class="w-full mt-3 border p-3 rounded-lg">
+            Cancel
+        </button>
+
+    </div>
+
 </div>
 
 <script>
-let activeTab = 'login';
-let selectedRoles = {login: 'student', register: 'student'};
 
-function switchTab(tab) {
-  activeTab = tab;
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1)));
-  document.getElementById('login-panel').classList.toggle('active', tab==='login');
-  document.getElementById('register-panel').classList.toggle('active', tab==='register');
-  hideError();
+function openRegister(){
+    document
+        .getElementById('registerModal')
+        .classList.remove('hidden');
 }
 
-function selectRole(btn) {
-  const panel = btn.closest('.form-panel');
-  const tab   = panel.id.replace('-panel','');
-  panel.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  const roleText = btn.textContent.trim();
-  selectedRoles[tab] = roleText.includes('Teacher') ? 'teacher' : 'student';
+function closeRegister(){
+    document
+        .getElementById('registerModal')
+        .classList.add('hidden');
 }
 
-function checkStrength(val) {
-  const colors = ['#ef4444','#f97316','#eab308','#22c55e'];
-  let score = 0;
-  if (val.length >= 6) score++;
-  if (/[A-Z]/.test(val)) score++;
-  if (/[0-9]/.test(val)) score++;
-  if (/[^A-Za-z0-9]/.test(val)) score++;
-  for (let i=1; i<=4; i++) {
-    document.getElementById('s'+i).style.background = i<=score ? colors[score-1] : 'rgba(255,255,255,0.1)';
-  }
-}
+async function registerUser(){
 
-function showError(msg) {
-  const el = document.getElementById('errorMsg');
-  el.textContent = msg; el.classList.add('show');
-}
-function hideError() {
-  document.getElementById('errorMsg').classList.remove('show');
-}
+    const name =
+        document.getElementById('regName').value;
 
-async function handleLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-pass').value;
-  if (!email || !pass) { showError('Please enter email and password'); return; }
-  hideError();
-  const btn = document.getElementById('loginBtn');
-  btn.disabled = true; btn.textContent = '⏳ Logging in...';
-  try {
-    const res  = await fetch('/api/login', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ email, password: pass })
+    const email =
+        document.getElementById('regEmail').value;
+
+    const password =
+        document.getElementById('regPassword').value;
+
+    const response = await fetch('/api/register',{
+        method:'POST',
+        headers:{
+            'Content-Type':'application/json'
+        },
+        body:JSON.stringify({
+            name,
+            email,
+            password
+        })
     });
-    const data = await res.json();
-    if (data.success) {
-      btn.textContent = '✅ Success!';
-      window.location.href = data.redirect;
-    } else {
-      showError(data.message || 'Login failed');
-      btn.disabled = false; btn.textContent = '⚡ Start Quest!';
+
+    const data = await response.json();
+
+    if(data.success){
+        alert('Registration Successful');
+        closeRegister();
     }
-  } catch(e) {
-    showError('Server error. Please try again.');
-    btn.disabled = false; btn.textContent = '⚡ Start Quest!';
-  }
+    else{
+        alert(data.error || 'Registration Failed');
+    }
 }
 
-async function handleRegister() {
-  const name    = document.getElementById('reg-name').value.trim();
-  const email   = document.getElementById('reg-email').value.trim();
-  const village = document.getElementById('reg-village').value.trim();
-  const grade   = document.getElementById('reg-grade').value;
-  const pass    = document.getElementById('reg-pass').value;
-  const role    = selectedRoles['register'];
-  if (!name||!email||!pass) { showError('Please fill all required fields'); return; }
-  if (pass.length < 6)     { showError('Password must be at least 6 characters'); return; }
-  hideError();
-  const btn = document.getElementById('regBtn');
-  btn.disabled = true; btn.textContent = '⏳ Creating account...';
-  try {
-    const res  = await fetch('/api/register', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ name, email, password: pass, role, village, grade })
+function openLogin(){
+    document
+        .getElementById('loginModal')
+        .classList.remove('hidden');
+}
+
+function closeLogin(){
+    document
+        .getElementById('loginModal')
+        .classList.add('hidden');
+}
+
+async function loginUser(){
+
+    const email =
+        document.getElementById('email').value;
+
+    const password =
+        document.getElementById('password').value;
+
+    const response = await fetch('/api/login',{
+        method:'POST',
+        headers:{
+            'Content-Type':'application/json'
+        },
+        body:JSON.stringify({
+            email,
+            password
+        })
     });
-    const data = await res.json();
-    if (data.success) {
-      btn.textContent = '✅ Account created!';
-      window.location.href = data.redirect;
-    } else {
-      showError(data.message || 'Registration failed');
-      btn.disabled = false; btn.textContent = '🚀 Join the Quest!';
+
+    const data = await response.json();
+
+    if(data.success){
+        window.location='/dashboard';
     }
-  } catch(e) {
-    showError('Server error. Please try again.');
-    btn.disabled = false; btn.textContent = '🚀 Join the Quest!';
-  }
+    else{
+        alert(data.error || 'Login failed');
+    }
+
 }
 
-// Floating orbs
-const colors = ['#f59e0b','#22c55e','#38bdf8','#f472b6','#fb923c'];
-const orbContainer = document.getElementById('orbs');
-for (let i=0; i<18; i++) {
-  const orb = document.createElement('div');
-  orb.className = 'orb';
-  const size = Math.random()*8+4;
-  orb.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${Math.random()*12+8}s;animation-delay:${Math.random()*8}s;`;
-  orbContainer.appendChild(orb);
-}
 </script>
-</body>
-</html>
+
+
+
+{% endblock %}

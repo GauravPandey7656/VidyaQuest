@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Subject{% endblock %}
+
+{% block content %}
+
+<div class="max-w-6xl mx-auto p-8">
+
+    <a href="/explorer"
+       class="text-indigo-600 font-semibold">
+        &larr; Back
+    </a>
+
+    <h1 id="subjectTitle"
+        class="text-4xl font-bold mt-4 mb-8">
+        Subject
+    </h1>
+
+    <div id="chapterGrid"
+         class="grid md:grid-cols-2 gap-6">
+    </div>
+
+</div>
+
+<script>
+
+const subjectId = {{ subject_id }};
+
+async function loadPath(){
+
+    const res =
+        await fetch(`/api/subjects/${subjectId}/path`);
+
+    const data = await res.json();
+
+    const grid =
+        document.getElementById('chapterGrid');
+
+    grid.innerHTML='';
+
+    data.chapters.forEach(ch => {
+
+        const status =
+            ch.unlocked ? '🔓' : '🔒';
+
+        grid.innerHTML += `
+<a href="/chapter/${ch.id}"
+   class="block bg-white shadow-lg rounded-xl p-6 hover:shadow-xl transition">
+
+    <h2 class="text-2xl font-bold">
+        ${status} ${ch.title}
+    </h2>
+
+    <div class="mt-4">
+        Progress:
+        <b>${ch.percent}%</b>
+    </div>
+
+    <div class="w-full bg-gray-200 rounded-full h-3 mt-3">
+
+        <div
+            class="bg-green-500 h-3 rounded-full"
+            style="width:${ch.percent}%">
+        </div>
+
+    </div>
+
+</a>
+`;
+    });
+}
+
+loadPath();
+
+</script>
+
+{% endblock %}
+
