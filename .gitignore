@@ -1,0 +1,17 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+
+table.db
+vidyaquest.db
+database/vidyaquest_backup.db
+
+.venv/
+venv/
+env/
+
+.vscode/
+.idea/
+
+.env
+.env.*
